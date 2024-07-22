@@ -1,4 +1,4 @@
-# DASNode Design
+# AtomSpaceNode Design
 
 This is a design proposal of the Distributed AtomSpace (DAS) Node.
 
@@ -6,10 +6,10 @@ Initial design will focus on Messaging and Leader Election.
 
 ## Goals
 
-- Ensure the DAS Node is resilient to network failures.
-- Ensure the DAS Node is resilient to leader failures.
-- Ensure the DAS Node is resilient to job failures.
-- Ensure the DAS Node will satisfy the use case.
+- Ensure the AtomSpaceNode is resilient to network failures.
+- Ensure the AtomSpaceNode is resilient to leader failures.
+- Ensure the AtomSpaceNode is resilient to job failures.
+- Ensure the AtomSpaceNode will satisfy the use case.
 - Ensure Nodes run inside docker containers.
 - Ensure speedup of at least 70% \* N considering the
   execution in a network with N (1 < N < 6) equally resourced NODEs against the
@@ -25,9 +25,9 @@ job is requested.
 - USER: a person using the software we provide to execute JOBs in a network of
   NODEs.
 - NODE: a server process running on a Docker container encompassing all
-  components required to run a DASNode.
+  components required to run a AtomSpaceNode.
 - JOB: a data structure designed to contain a script in one of the script
-  languages supported by DASNode. This script contains all the code required to
+  languages supported by AtomSpaceNode. This script contains all the code required to
   execute a given task.
 - MESSAGE: a data structure to encapsulate pieces of information we want to
   transport from one NODE to another.
@@ -62,7 +62,7 @@ job is requested.
   and ordered delivery.
 - The messaging system will abstract the underlying network topology.
 - The messaging layer will be an external library. That way we can easily
-  change it, without changing the code of the DAS Node.
+  change it, without changing the code of the AtomSpaceNode.
 
 #### Considered Topologies
 
@@ -119,36 +119,36 @@ Messaging layer API:
 
 1. **LeaderElection**:
 
-    - Election Message: Sent by a node to all nodes with higher IDs when it
-    starts an election.
-    - OK Message: Sent by a node with a higher ID in response to an Election
-    message to indicate that it is still alive and will start its own election.
-    - Coordinator Message: Sent by the node with the highest ID (the new leader)
-    to all other nodes to announce itself as the leader.
+   - Election Message: Sent by a node to all nodes with higher IDs when it
+     starts an election.
+   - OK Message: Sent by a node with a higher ID in response to an Election
+     message to indicate that it is still alive and will start its own election.
+   - Coordinator Message: Sent by the node with the highest ID (the new leader)
+     to all other nodes to announce itself as the leader.
 
 2. **Telemetry**:
 
-    - Heartbeat Messages: Heartbeat messages are sent periodically by each node
-    to indicate that it is alive and functioning.
-    - Status Messages: Status messages provide more detailed information about
-    the node's current state, including resource usage and operational status.
-    - Metrics Messages: Metrics messages provide detailed performance data for
-    monitoring and analysis.
-    - Alert Messages: Alert messages are sent when a node detects a condition
-    that requires immediate attention.
-    - Log Messages: Log messages provide detailed logging information for
-    debugging and auditing purposes.
+   - Heartbeat Messages: Heartbeat messages are sent periodically by each node
+     to indicate that it is alive and functioning.
+   - Status Messages: Status messages provide more detailed information about
+     the node's current state, including resource usage and operational status.
+   - Metrics Messages: Metrics messages provide detailed performance data for
+     monitoring and analysis.
+   - Alert Messages: Alert messages are sent when a node detects a condition
+     that requires immediate attention.
+   - Log Messages: Log messages provide detailed logging information for
+     debugging and auditing purposes.
 
 3. **JobManagement**:
-    - Job Submission Message: Sent by the user to any node to submit a job for
-    processing.
-    - Job Assignment Message: Sent by the leader node to assign job parts to
-    other nodes.
-    - Job Progress Message: Sent by a node to report the progress of a job
-    part.
-    - Job Result Message: Sent by a node to report the result of a job part.
-    - Job Cancellation Message: Sent by the user or leader node to cancel a
-    job.
+   - Job Submission Message: Sent by the user to any node to submit a job for
+     processing.
+   - Job Assignment Message: Sent by the leader node to assign job parts to
+     other nodes.
+   - Job Progress Message: Sent by a node to report the progress of a job
+     part.
+   - Job Result Message: Sent by a node to report the result of a job part.
+   - Job Cancellation Message: Sent by the user or leader node to cancel a
+     job.
 
 ### Leader Election
 
@@ -210,7 +210,7 @@ Perform a single query to the remote DAS Server, process all the results and
 perform some extra computation on each result in order to evaluate each
 result's quality.
 
-JOB should be defined as a script in some programming language. DASNode should
+JOB should be defined as a script in some programming language. AtomSpaceNode should
 be able to support multiple programming languages here so the design must be
 flexible. Initially we'll support only Python scripts doing queries to a remote
 DAS Server.
