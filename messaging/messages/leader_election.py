@@ -20,6 +20,10 @@ class ElectionVoteMessage(Message):
 
     topic: Topics = Topics.election_vote
 
+    @property
+    def score(self) -> int:
+        return self.payload["score"]
+
 
 @dataclass(kw_only=True)
 class LeaderAnnouncementMessage(Message):
@@ -28,3 +32,7 @@ class LeaderAnnouncementMessage(Message):
     """
 
     topic: Topics = Topics.leader_announcement
+
+    @property
+    def leader_id(self) -> int:
+        return self.sender
