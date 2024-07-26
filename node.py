@@ -1,32 +1,52 @@
-from dataclasses import dataclass, field
+import logging
+from time import sleep
+
+from leadership.broker import LeadershipBroker
+from messaging.broker import MessageBroker
+
+logging.basicConfig(level=logging.DEBUG)
+log = logging.getLogger(__name__)
 
 
-@dataclass(kw_only=True)
-class AtomSpaceNodeState:
+class AtomSpaceNode:
+    """
+    Distributed AtomSpace node class
+    """
+
     id: int
     """ The id of the AtomSpaceNode """
-    leader_id: int = -1
-    """ The current leader of the network """
-    nodes_ids: set[int] = field(default_factory=lambda: {1, 2, 3, 4, 5, 6})
-    """ A list of other known nodes in the network """
 
-    @property
-    def has_leader(self) -> bool:
-        """Returns if the node has a leader"""
-        return self.leader_id > 0
+    leadership_broker: LeadershipBroker
+    """
+    LeadershipBroker instance, so every other module can use it
+    """
 
-    @property
-    def is_leader(self) -> bool:
-        """Returns if the node is the leader"""
-        return self.id == self.leader_id
+    message_broker: MessageBroker
+    """
+    MessagingBroker instance, so that every other module can use it
+    """
 
-    def reset_leader(self) -> None:
-        self.leader_id = -1
+    def __init__(self, node_id: int):
+        """
+        Args:
+            node_id: Id of the node
+        """
+        self.id = node_id
 
-    def set_leader(self, leader_id: int) -> None:
-        """ Sets the leader of the node, if there isn't one already """
-        if self.has_leader:
-            # log.waring("Node %s already has a leader %s", self.id, self.leader_id)
-            return
+    def setup(self):
+        self.message_broker = MessageBroker.factory(self)
+        self.message_broker.start()
 
-        self.leader_id = leader_id
+        self.leadership_broker = LeadershipBroker.factory(self)
+
+
+    def loop_forever(self):
+        """
+        Creates a background thread and join it.
+        """
+        try:
+            while True:
+                sleep(.5)
+        except KeyboardInterrupt:
+            pass
+
