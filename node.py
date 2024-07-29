@@ -42,8 +42,6 @@ class AtomSpaceNode:
         self.message_broker = message_broker
         self.leadership_broker = leadership_broker
 
-        self.message_broker.activate()
-
     def shutdown(self):
         """
         Gracefully shutdown the node.
