@@ -20,3 +20,15 @@ extend-ignore = ["E501"]
 
 [tool.mypy]
 files = "*.py"
+
+[tool.pyright]
+pythonVersion = "3.10"
+reportUnusedVariable = false
+reportMissingImports = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.pylint]
+disable = "unused-argument"

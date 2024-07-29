@@ -48,7 +48,7 @@ services:
   start_election: 
     <<: *node-shared
     container_name: start_election
-    entrypoint: ["python", "start_election.py"]
+    entrypoint: ["python", "examples/start_election.py"]
     profiles:
       - manual
 
@@ -56,7 +56,7 @@ services:
     image: eclipse-mosquitto
     container_name: mosquitto
     volumes:
-    - "./mosquitto.conf:/mosquitto/config/mosquitto.conf"
+    - "./messaging/brokers/mosquitto.conf:/mosquitto/config/mosquitto.conf"
 
     ports:
       - "1883:1883"

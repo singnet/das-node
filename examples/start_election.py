@@ -1,5 +1,6 @@
 from paho.mqtt.client import Client
-from messaging.messages.packet import Packet, MessageType
+
+from messaging.messages.packet import MessageType, Packet
 from messaging.messages.serializers import PickleSerializer
 
 
