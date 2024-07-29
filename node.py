@@ -26,6 +26,11 @@ class AtomSpaceNode:
     MessagingBroker instance, so that every other module can use it
     """
 
+    _shutdown: bool = False
+    """
+    Flag to shutdown the node
+    """
+
     def __init__(self, node_id: int):
         """
         Args:
@@ -33,20 +38,24 @@ class AtomSpaceNode:
         """
         self.id = node_id
 
-    def setup(self):
-        self.message_broker = MessageBroker.factory(self)
-        self.message_broker.start()
+    def setup(self, message_broker: MessageBroker, leadership_broker: LeadershipBroker):
+        self.message_broker = message_broker
+        self.leadership_broker = leadership_broker
 
-        self.leadership_broker = LeadershipBroker.factory(self)
+        self.message_broker.activate()
 
+    def shutdown(self):
+        """
+        Gracefully shutdown the node.
+        """
+        self._shutdown = True
 
     def loop_forever(self):
         """
         Creates a background thread and join it.
         """
         try:
-            while True:
-                sleep(.5)
+            while not self._shutdown:
+                sleep(0.5)
         except KeyboardInterrupt:
             pass
-

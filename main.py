@@ -1,10 +1,9 @@
 import logging
 from os import getenv
 
-
-from time import sleep
+from leadership.factory import LeadershipAlgorithm, LeadershipBrokerFactory
+from messaging.factory import MessageBrokerFactory, MessageFramework
 from node import AtomSpaceNode
-from messaging.messages.packet import Packet, MessageType
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -20,12 +19,19 @@ def main():
 
     node = AtomSpaceNode(int(node_id))
 
+    log.info("Factoring brokers")
+    # MessageBroker
+    message_broker = MessageBrokerFactory.get_broker(node, MessageFramework.MQTT)
+    message_broker.activate()
+
+    # LeadershipBroker
+    leadership_broker = LeadershipBrokerFactory.get_broker(node, LeadershipAlgorithm.BULLY)
+
     log.info("Setting Up the nodes")
-    node.setup()
+    node.setup(message_broker, leadership_broker)
 
     node.loop_forever()
     log.info("Exiting node")
-
 
 
 if __name__ == "__main__":

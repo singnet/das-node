@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Any
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from messaging.enums import MessageType
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Packet:
     """
     Serializable packet to be sent over the network.
@@ -16,6 +16,10 @@ class Packet:
     data: Any
     """
     data to be sent/received.
+    """
+    sender: int
+    """
+    Id of the sender.
     """
 
 

@@ -15,12 +15,12 @@ class Bully(LeadershipBroker):
         self.votes = set()
 
     def elect_leader(self) -> None:
-
         self.reset_leader()
 
         packet = Packet(
             msg_type=MessageType.LEADERSHIP_ELECTION_START,
-            data = None
+            data=None,
+            sender=self.node.id,
         )
 
         self.node.message_broker.broadcast(packet)
@@ -28,7 +28,8 @@ class Bully(LeadershipBroker):
     def vote(self) -> None:
         packet = Packet(
             msg_type=MessageType.LEADERSHIP_ELECTION_VOTE,
-            data = self.node.id
+            data=self.node.id,
+            sender=self.node.id,
         )
 
         self.node.message_broker.broadcast(packet)
@@ -37,7 +38,8 @@ class Bully(LeadershipBroker):
         self._leader_id = self.node.id
         packet = Packet(
             msg_type=MessageType.LEADERSHIP_ANNOUNCEMENT,
-            data = self.node.id
+            data=self.node.id,
+            sender=self.node.id,
         )
 
         self.node.message_broker.broadcast(packet)

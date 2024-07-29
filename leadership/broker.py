@@ -1,11 +1,9 @@
 from abc import ABC, abstractmethod
 
-# from leadership.exceptions import InvalidLeaderAlgorithmException
 from messaging.messages.packet import Packet
 
 
 class LeadershipBroker(ABC):
-
     _leader_id: int | None = None
 
     """
@@ -59,7 +57,7 @@ class LeadershipBroker(ABC):
         """
         raise NotImplementedError
 
-    def reset_leader(self) -> None:
+    def _reset_leader(self) -> None:
         """
         Resets the leader to None.
         """
@@ -88,15 +86,3 @@ class LeadershipBroker(ABC):
 
         returns: True if this node is the leader."""
         return self._leader_id == self.node.id
-
-    @staticmethod
-    def factory(node: "AtomSpaceNode") -> "LeadershipBroker":
-        """
-        Builds the LeadershipBroker with an specific election algorithm
-
-        returns: broker instance
-
-        """
-        from leadership.algorithms import Bully
-        return Bully(node)
-
