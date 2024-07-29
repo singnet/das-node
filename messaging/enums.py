@@ -1,15 +1,19 @@
 from enum import Enum, auto
 
+
 class MessageFramework(Enum):
     """
     Enum of all available message frameworks.
     """
+
     MQTT = auto()
+
 
 class MessageType(Enum):
     """
     Enum of all available message types.
     """
+
     ANY = auto()
 
     # Leadership Election types
@@ -17,7 +21,7 @@ class MessageType(Enum):
     LEADERSHIP_ELECTION_VOTE = auto()
     LEADERSHIP_ANNOUNCEMENT = auto()
 
-    # Node discovery types
+    # Node control types
+    NODE_SHUTDOWN = auto()
 
     # Job Manager types
-

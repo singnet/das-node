@@ -1,7 +1,7 @@
 from abc import ABC
 
-from leadership.broker import LeadershipBroker
 from leadership.algorithms import Bully, LeadershipAlgorithm
+from leadership.broker import LeadershipBroker
 from leadership.exceptions import InvalidLeadershipAlgorithmException
 
 

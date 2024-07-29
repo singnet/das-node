@@ -1,13 +1,13 @@
 import logging
 
 from leadership.broker import LeadershipBroker
-from messaging.messages.packet import Packet
 from messaging.enums import MessageType
+from messaging.messages.packet import Packet
 
 log = logging.getLogger(__name__)
 
-class Bully(LeadershipBroker):
 
+class Bully(LeadershipBroker):
     votes: set[int]
 
     def __init__(self, node: "AtomSpaceNode"):
@@ -15,7 +15,7 @@ class Bully(LeadershipBroker):
         self.votes = set()
 
     def elect_leader(self) -> None:
-        self.reset_leader()
+        self._reset_leader()
 
         packet = Packet(
             msg_type=MessageType.LEADERSHIP_ELECTION_START,
@@ -31,7 +31,7 @@ class Bully(LeadershipBroker):
             data=self.node.id,
             sender=self.node.id,
         )
-
+        self.votes.add(self.node.id)
         self.node.message_broker.broadcast(packet)
 
     def announce_leader(self) -> None:
@@ -45,6 +45,7 @@ class Bully(LeadershipBroker):
         self.node.message_broker.broadcast(packet)
 
     def on_election_start(self, packet: Packet) -> None:
+        self.votes.clear()
         self.vote()
 
     def on_vote_received(self, packet: Packet) -> None:
@@ -54,10 +55,10 @@ class Bully(LeadershipBroker):
 
     def process_votes(self):
         known_nodes = self.node.message_broker.get_all_known_nodes()
-        log.debug(f"{len(known_nodes)=}")
+        log.debug(f"{len(known_nodes)=} == {len(self.votes)}")
         if not len(self.votes) == len(known_nodes) + 1:
             return
-        
+
         if max(self.votes) == self.node.id:
             self.announce_leader()
 

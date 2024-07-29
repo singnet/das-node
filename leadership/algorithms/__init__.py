@@ -1,4 +1,4 @@
-from leadership.algorithms.enums import LeadershipAlgorithms
 from leadership.algorithms.bully import Bully
+from leadership.algorithms.enums import LeadershipAlgorithm
 
-__all__ = ["LeadershipAlgorithms", "Bully"]
+__all__ = ["LeadershipAlgorithm", "Bully"]

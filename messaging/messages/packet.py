@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Any
 from dataclasses import dataclass, field
+from typing import Any
+
 from messaging.enums import MessageType
 
 
@@ -9,6 +10,7 @@ class Packet:
     """
     Serializable packet to be sent over the network.
     """
+
     msg_type: MessageType
     """
     Type of the message to be sent/received.
@@ -33,14 +35,27 @@ class PacketSerializer(ABC):
     def serialize(packet: Packet) -> bytes:
         """
         Serialize a packet.
+        Args:
+            packet: Packet to serialize
+        Returns:
+            serialized packet in bytes
         """
+        # TODO:
+        # Raises:
+        #     PacketSerializerException: if packet data is invalid
         raise NotImplementedError
 
     @staticmethod
     @abstractmethod
     def deserialize(data: bytes) -> Packet:
         """
-        Deserialize a packet.
+        Deserialize data(bytes) into a Packet object.
+        Args:
+            data: bytes to deserialize
+        Returns:
+             Packet object
         """
+        # TODO:
+        # Raises:
+        #     PacketSerializerException: if packet data is invalid
         raise NotImplementedError
-
