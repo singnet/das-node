@@ -58,6 +58,7 @@ services:
     container_name: mosquitto
     volumes:
     - "./messaging/brokers/mosquitto.conf:/mosquitto/config/mosquitto.conf"
+    attach: false
 
     ports:
       - "1883:1883"
