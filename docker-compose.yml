@@ -49,6 +49,7 @@ services:
     <<: *node-shared
     container_name: start_election
     entrypoint: ["python", "examples/start_election.py"]
+    # entrypoint: ["pwd"]
     profiles:
       - manual
 
