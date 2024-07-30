@@ -1,0 +1,72 @@
+version: '3.8'
+
+x-node: &node-shared
+  build: .
+  volumes:
+    - ".:/app"
+  depends_on:
+    mosquitto:
+      condition: service_healthy
+
+services:
+  node1:
+    <<: *node-shared
+    container_name: node1
+    environment:
+      - NODE_ID=1
+
+  node2:
+    <<: *node-shared
+    container_name: node2
+    environment:
+      - NODE_ID=2
+
+  node3:
+    <<: *node-shared
+    container_name: node3
+    environment:
+      - NODE_ID=3
+
+  node4:
+    <<: *node-shared
+    container_name: node4
+    environment:
+      - NODE_ID=4
+
+  node5:
+    <<: *node-shared
+    container_name: node5
+    environment:
+      - NODE_ID=5
+
+  node6:
+    <<: *node-shared
+    container_name: node6
+    environment:
+      - NODE_ID=6
+
+  start_election: 
+    <<: *node-shared
+    container_name: start_election
+    entrypoint: ["python", "examples/start_election.py"]
+    # entrypoint: ["pwd"]
+    profiles:
+      - manual
+
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    volumes:
+    - "./messaging/brokers/mosquitto.conf:/mosquitto/config/mosquitto.conf"
+    attach: false
+
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "mosquitto_pub", "-h", "localhost", "-t", "test", "-m", "test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
