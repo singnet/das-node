@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
-from messaging.enums import MessageType
+from messaging.messages.message import BaseMessage
 
 
 @dataclass(kw_only=True)
@@ -11,7 +11,7 @@ class Packet:
     Serializable packet to be sent over the network.
     """
 
-    msg_type: MessageType
+    msg_class: type[BaseMessage]
     """
     Type of the message to be sent/received.
     """

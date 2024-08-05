@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-
-from messaging.messages.packet import Packet
+from typing import Any
 
 
 class LeadershipBroker(ABC):
@@ -13,6 +12,10 @@ class LeadershipBroker(ABC):
     node: "AtomSpaceNode"
     """
     Node this broker belongs to.
+    """
+    _election_in_progress: bool = False
+    """
+    Bool flag for election in progress
     """
 
     @abstractmethod
@@ -37,21 +40,21 @@ class LeadershipBroker(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def on_election_start(self, packet: Packet) -> None:
+    def on_election_start(self) -> None:
         """
         Handles the message when the election starts.
         """
         raise NotImplementedError
 
     @abstractmethod
-    def on_vote_received(self, packet: Packet) -> None:
+    def on_vote_received(self, data) -> None:
         """
         Handles the message when a vote is received.
         """
         raise NotImplementedError
 
     @abstractmethod
-    def on_leader_announced(self, packet: Packet) -> None:
+    def on_leader_announced(self, data) -> None:
         """
         Handels the message when leader is announced.
         """

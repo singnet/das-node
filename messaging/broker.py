@@ -16,24 +16,7 @@ class MessageBroker(ABC):
     """
 
     def _act(self, packet: Packet) -> None:
-        """
-        Callbacks an action uppon receiving a packet
-        Args:
-            packet: The receiving packet
-        Raises:
-            InvalidMessageTypeException: if packet.msg_type is invalid
-        """
-        match packet.msg_type:
-            case MessageType.LEADERSHIP_ELECTION_START:
-                self.node.leadership_broker.on_election_start(packet)
-            case MessageType.LEADERSHIP_ELECTION_VOTE:
-                self.node.leadership_broker.on_vote_received(packet)
-            case MessageType.LEADERSHIP_ANNOUNCEMENT:
-                self.node.leadership_broker.on_leader_announced(packet)
-            case MessageType.NODE_SHUTDOWN:
-                self.node.shutdown()
-            case _:
-                raise InvalidMessageTypeException
+        packet.msg_class().act(self.node, packet.data)
 
     @abstractmethod
     def activate(self) -> None:
@@ -67,7 +50,7 @@ class MessageBroker(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def send(self, packet: Packet, dst: int):
+    def send(self, packet: Packet, dst: int | None):
         """
         Send a message to a specific node. Does not wait for messages to be received.
 
