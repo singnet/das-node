@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-
-from node import AtomSpaceNode
+from typing import Any
 
 
 class BaseMessage(ABC):
@@ -9,16 +8,6 @@ class BaseMessage(ABC):
     """
 
     @abstractmethod
-    def act(node: AtomSpaceNode, data: Any) -> None:
-        """ """
+    def act(self, node: "AtomSpaceNode", data: Any) -> None:
+        """What should be done when receiving a message."""
         raise NotImplementedError
-
-
-class StartElectionMessage(BaseMessage):
-    def act(node: AtomSpaceNode, data: Any) -> None:
-        node.leadership_broker.on_elect_leader(data)
-
-
-class ElectionVoteMessage(BaseMessage):
-    def act(node: AtomSpaceNode, data: Any) -> None:
-        node.leadership_broker.on_vote_received(data)

@@ -35,7 +35,7 @@ class MQTTBroker(MessageBroker):
         self._client.on_subscribe = self._on_subscribe
         self._client.on_message = self._on_message
 
-        self._known_nodes = set([1, 2, 3, 4, 5, 6])
+        self._known_nodes = set([1, 2, 3, 4])
         self._known_nodes.remove(self.node.id)
 
     # Base class methods
@@ -82,12 +82,12 @@ class MQTTBroker(MessageBroker):
         Called when receiving a message.
         """
         packet = self.packet_serializer.deserialize(msg.payload)
-        log.info("Received packet: %s on topic: %s", packet, msg.topic)
 
         if msg.topic == self._broadcast_topic() and packet.sender == self.node.id:
             # ignore broadcst messages from self
             return
 
+        log.info("Received packet: %s on topic: %s", packet, msg.topic)
         self._act(packet)
 
     def _publish(self, topic: str, packet: Packet) -> None:

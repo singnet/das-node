@@ -20,7 +20,7 @@ class JsonSerializer(PacketSerializer):
     @staticmethod
     def serialize(packet: Packet) -> bytes:
         # TODO: try/except JSONSerializable and re raise custom exception
-        packet_dict = {"msg_type": packet.msg_type, "data": packet.data}
+        packet_dict = {"msg_class": packet.msg_class, "data": packet.data}
         return json.dumps(packet_dict).encode()
 
     @staticmethod
@@ -28,5 +28,7 @@ class JsonSerializer(PacketSerializer):
         # TODO: try/except JSONSerializable and re raise custom exception
         packet_json = json.loads(data)
         return Packet(
-            msg_type=packet_json["msg_type"], data=packet_json["data"], sender=packet_json["sender"]
+            msg_class=packet_json["msg_class"],
+            data=packet_json["data"],
+            sender=packet_json["sender"],
         )

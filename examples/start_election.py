@@ -1,11 +1,12 @@
 from paho.mqtt.client import Client
 
-from messaging.messages.packet import MessageType, Packet
+from leadership.messages import StartJobMessage
+from messaging.messages.packet import Packet
 from messaging.messages.serializers import PickleSerializer
 
 
 def main():
-    packet = Packet(msg_type=MessageType.LEADERSHIP_ELECTION_START, data=None, sender=0)
+    packet = Packet(msg_class=StartJobMessage, data=None, sender=0)
     mqtt = Client()
     mqtt.connect("mosquitto", 1883, 60)
     topic = "AtomSpace/broadcast"
