@@ -1,5 +1,11 @@
 TARGETS=hyperon_das_node
 
+shell:
+	@poetry shell
+
+install:
+	@poetry install
+
 build:
 	@docker-compose build
 
