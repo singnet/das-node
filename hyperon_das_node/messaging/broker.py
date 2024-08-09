@@ -1,12 +1,16 @@
-from abc import ABC, abstractmethod
+from __future__ import annotations
 
-from messaging.enums import MessageType
-from messaging.exceptions import InvalidMessageTypeException
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
+
 from messaging.messages.packet import Packet, PacketSerializer
+
+if TYPE_CHECKING:
+    from node import AtomSpaceNode
 
 
 class MessageBroker(ABC):
-    node: "AtomSpaceNode"
+    node: AtomSpaceNode
     """
     Reference to the node this broker belongs to.
     """

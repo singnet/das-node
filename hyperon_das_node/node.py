@@ -54,6 +54,32 @@ class AtomSpaceNode:
         """
         try:
             while not self._shutdown:
-                sleep(0.5)
+                self._loop()
         except KeyboardInterrupt:
             pass
+
+    def _loop(self) -> None:
+        """
+        Main loop of the node
+        """
+        self._sleep()
+
+    def check_leader(self) -> None:
+        """
+        Checks if there is a leader on the network, if not, elect a new one
+        """
+        if not self.leadership_broker.has_leader:
+            self.leadership_broker.elect_leader()
+            self.wait_for_leader()
+
+    def wait_for_leader(self):
+        while not self.leadership_broker.has_leader:
+            self._sleep()
+
+    def _sleep(self, interval: int = 100) -> None:
+        """
+        Sleeps for interval milliseconds. This is a blocking function.
+        Params:
+            interval (int): Time in milliseconds to sleep, default value is 100ms
+        """
+        sleep(interval / 1000)

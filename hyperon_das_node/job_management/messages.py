@@ -1,13 +1,10 @@
-""" """
-
 from abc import ABC, abstractmethod
+from logging import getLogger
 from typing import Any
-from time import sleep
 
 from messaging.messages import BaseMessage
 from node import AtomSpaceNode
 
-from logging import getLogger
 log = getLogger(__name__)
 
 
@@ -19,20 +16,8 @@ class JobStartMessage(BaseMessage, ABC):
     """
 
     def act(self, node: AtomSpaceNode, data: Any) -> None:
-        # log.debug("Starting Job, has_leader: %s", node.leadership_broker.has_leader)
-        # if not node.leadership_broker.has_leader:
-        #     log.debug("starting leader election")
-        #     node.leadership_broker.elect_leader()
-
-        # log.debug("waiting for leader")
-        # self.wait_leader_election(node)
-        # log.debug("Leader announced Doing JOB")
-        self.do_job(node, data)
-
-    # Messages cannot have blocking calls
-    def wait_leader_election(self, node: AtomSpaceNode) -> None:
-        while not node.leadership_broker.has_leader:
-            sleep(1)
+        if hasattr(node, "_job_requestor"):
+            node.start_job()
 
     @abstractmethod
     def do_job(self, node: AtomSpaceNode, data: Any) -> None:

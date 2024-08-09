@@ -1,9 +1,7 @@
-version: '3.8'
-
 x-node: &node-shared
   build: .
   volumes:
-    - ".:/app"
+    - "./hyperon_das_node:/app/"
   depends_on:
     mosquitto:
       condition: service_healthy
@@ -33,23 +31,10 @@ services:
     environment:
       - NODE_ID=4
 
-  node5:
-    <<: *node-shared
-    container_name: node5
-    environment:
-      - NODE_ID=5
-
-  node6:
-    <<: *node-shared
-    container_name: node6
-    environment:
-      - NODE_ID=6
-
   start_election: 
     <<: *node-shared
     container_name: start_election
     entrypoint: ["python", "examples/start_election.py"]
-    # entrypoint: ["pwd"]
     profiles:
       - manual
 
@@ -57,9 +42,8 @@ services:
     image: eclipse-mosquitto
     container_name: mosquitto
     volumes:
-    - "./messaging/brokers/mosquitto.conf:/mosquitto/config/mosquitto.conf"
+    - "./hyperon_das_node/messaging/brokers/mosquitto.conf:/mosquitto/config/mosquitto.conf"
     attach: false
-
     ports:
       - "1883:1883"
       - "9001:9001"

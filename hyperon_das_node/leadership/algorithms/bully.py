@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from leadership.broker import LeadershipBroker
 from leadership.messages import (
@@ -7,6 +8,7 @@ from leadership.messages import (
     StartElectionMessage,
 )
 from messaging.messages.packet import Packet
+from node import AtomSpaceNode
 
 log = logging.getLogger(__name__)
 
@@ -14,9 +16,12 @@ log = logging.getLogger(__name__)
 class Bully(LeadershipBroker):
     votes: set[int]
 
-    def __init__(self, node: "AtomSpaceNode"):
+    def __init__(self, node: AtomSpaceNode):
         self.node = node
         self.votes = set()
+
+        self._election_in_progress = False
+        self._leader_id = None
 
     def elect_leader(self) -> None:
         log.debug("Starting a new leader election")
@@ -75,6 +80,7 @@ class Bully(LeadershipBroker):
         if max(self.votes) == self.node.id:
             self.announce_leader()
 
-    def on_leader_announced(self, data: int) -> None:
+    def on_leader_announced(self, data: Any) -> None:
+        data = int(data)
         self._leader_id = data
         self._election_in_progress = False

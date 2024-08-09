@@ -1,11 +1,11 @@
-from typing import Any
+from logging import getLogger
 from time import sleep
-
-from .determinant_node import DeterminantNode
+from typing import Any
 
 from job_management import messages as job_messages
 from messaging.messages.packet import Packet
-from logging import getLogger
+
+from .determinant_node import DeterminantNode
 
 log = getLogger(__name__)
 
@@ -22,10 +22,6 @@ class StartDeterminantJob(job_messages.JobStartMessage):
         log.debug("Node is leader, sending Determinant2Job")
         self.request_determinant_2x2(node)
         log.debug("Awaiting results")
-        # self.wait_results(node)
-        # log.debug("Results arrived")
-        # self.job_complete(node)
-        # log.debug("Job complete")
 
     def request_determinant_2x2(self, node: DeterminantNode) -> None:
         # list of known_nodes to send a request to calculate the 2x2 determinant
@@ -36,7 +32,9 @@ class StartDeterminantJob(job_messages.JobStartMessage):
 
         for i in range(len(node.matrix)):
             cofactor = (-1) ** i * node.matrix[0][i]
-            packet = Packet(msg_class=Determinant2Message, data=(node.matrix, i, cofactor), sender=node.id)
+            packet = Packet(
+                msg_class=Determinant2Message, data=(node.matrix, i, cofactor), sender=node.id
+            )
             node.message_broker.send(packet=packet, dst=peers[i])
 
     def job_complete(self, node: DeterminantNode) -> None:

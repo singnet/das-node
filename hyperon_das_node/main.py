@@ -21,11 +21,11 @@ def main():
 
     log.info("Factoring brokers")
     # MessageBroker
-    message_broker = MessageBrokerFactory.get_broker(node, MessageFramework.MQTT)
+    message_broker = MessageBrokerFactory.get_broker(MessageFramework.MQTT)(node)
     message_broker.activate()
 
     # LeadershipBroker
-    leadership_broker = LeadershipBrokerFactory.get_broker(node, LeadershipAlgorithm.BULLY)
+    leadership_broker = LeadershipBrokerFactory.get_broker(LeadershipAlgorithm.BULLY)(node)
 
     log.info("Setting Up the nodes")
     node.setup(message_broker, leadership_broker)
