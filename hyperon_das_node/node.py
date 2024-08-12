@@ -1,8 +1,10 @@
 import logging
+from typing import Any
 from time import sleep
 
 from leadership.broker import LeadershipBroker
 from messaging.broker import MessageBroker
+from job_management import job_messages
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
@@ -83,3 +85,23 @@ class AtomSpaceNode:
             interval (int): Time in milliseconds to sleep, default value is 100ms
         """
         sleep(interval / 1000)
+
+    def on_job_start(self, data: Any) -> None:
+        """ """
+
+        self.check_leader()
+        if not self.leadership_broker.is_leader:
+            return
+
+        self._do_job(data)
+
+    def _do_job(self, data: Any) -> Any:
+        log.info("Job start received by leader %s", data)
+        # this is an empy implementation, job will automatically complete
+        self.complete_job()
+
+    def complete_job(self) -> None:
+        """
+        Called when the job is done, to send a JobCompleteMessage
+        """
+        self.message_broker.broadcast(msg_class=job_messages.JobCompleteMessage, data=None)

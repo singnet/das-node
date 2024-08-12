@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import Any
 
@@ -8,7 +7,7 @@ from node import AtomSpaceNode
 log = getLogger(__name__)
 
 
-class JobStartMessage(BaseMessage, ABC):
+class JobStartMessage(BaseMessage):
     """
     Abstract JobStartMessage, should be extended by all jobs.
     Use it to start the job.
@@ -16,39 +15,29 @@ class JobStartMessage(BaseMessage, ABC):
     """
 
     def act(self, node: AtomSpaceNode, data: Any) -> None:
-        if hasattr(node, "_job_requestor"):
-            node.start_job()
-
-    @abstractmethod
-    def do_job(self, node: AtomSpaceNode, data: Any) -> None:
-        raise NotImplementedError
+        node.start_job(data)
 
 
-class JobCompleteMessage(BaseMessage, ABC):
+class JobCompleteMessage(BaseMessage):
     def act(self, node: AtomSpaceNode, data: Any) -> None:
-        raise NotImplementedError
+        node.job_completed(data)
 
 
-class JobFailureMessage(BaseMessage, ABC):
+class JobFailureMessage(BaseMessage):
     def act(self, node: AtomSpaceNode, data: Any) -> None:
-        raise NotImplementedError
+        node.job_failed(data)
 
 
-class JobStatusMessage(BaseMessage, ABC):
+class JobStatusMessage(BaseMessage):
     def act(self, node: AtomSpaceNode, data: Any) -> None:
-        raise NotImplementedError
+        node.job_status(data)
 
 
-class JobStatusReplyMessage(BaseMessage, ABC):
+class JobStatusReplyMessage(BaseMessage):
     def act(self, node: AtomSpaceNode, data: Any) -> None:
-        raise NotImplementedError
+        log.info("A JobStatus was received on node_id: %s with data %s", node.id, data)
 
 
-class JobCancelMessage(BaseMessage, ABC):
+class JobCancelMessage(BaseMessage):
     def act(self, node: AtomSpaceNode, data: Any) -> None:
-        raise NotImplementedError
-
-
-class JobMessage(BaseMessage, ABC):
-    def act(self, node: AtomSpaceNode, data: Any) -> None:
-        raise NotImplementedError
+        node.job_cancelled(data)
