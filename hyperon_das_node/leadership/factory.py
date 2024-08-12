@@ -11,7 +11,7 @@ class LeadershipBrokerFactory(ABC):
     """
 
     @staticmethod
-    def get_broker(node: "AtomSpaceNode", framework: LeadershipAlgorithm) -> LeadershipBroker:
+    def get_broker(framework: LeadershipAlgorithm) -> type[LeadershipBroker]:
         """
         Factory method to create a leadership broker
         Instance of the broker class is returned and there is no reference to this class.
@@ -26,8 +26,6 @@ class LeadershipBrokerFactory(ABC):
         """
         class_name = {LeadershipAlgorithm.BULLY: Bully}
         try:
-            leadership_broker = class_name[framework]
+            return class_name[framework]
         except KeyError:
             raise InvalidLeadershipAlgorithmException(framework)
-
-        return leadership_broker(node)

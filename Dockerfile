@@ -9,7 +9,7 @@ RUN pip install -r requirements.txt
 ENV PYTHONPATH=/app
 
 # Copy code
-COPY . .
+ADD ./hyperon_das_node /app/
 
 CMD ["python", "main.py"]
 

@@ -1,5 +1,10 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from node import AtomSpaceNode
 
 
 class LeadershipBroker(ABC):
@@ -9,10 +14,11 @@ class LeadershipBroker(ABC):
     The id of the leader, if None, there is no leader.
     """
 
-    node: "AtomSpaceNode"
+    node: AtomSpaceNode
     """
     Node this broker belongs to.
     """
+
     _election_in_progress: bool = False
     """
     Bool flag for election in progress
@@ -47,14 +53,14 @@ class LeadershipBroker(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def on_vote_received(self, data) -> None:
+    def on_vote_received(self, data: Any) -> None:
         """
         Handles the message when a vote is received.
         """
         raise NotImplementedError
 
     @abstractmethod
-    def on_leader_announced(self, data) -> None:
+    def on_leader_announced(self, data: Any) -> None:
         """
         Handels the message when leader is announced.
         """

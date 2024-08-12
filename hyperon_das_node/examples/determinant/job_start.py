@@ -1,11 +1,10 @@
-from paho.mqtt.client import Client
+from time import sleep
 
+from examples.determinant.messages import StartDeterminantJob
 from leadership.messages import StartElectionMessage
 from messaging.messages.packet import Packet
 from messaging.messages.serializers import PickleSerializer
-
-from examples.determinant.messages import StartDeterminantJob
-from time import sleep
+from paho.mqtt.client import Client
 
 
 def main():
@@ -14,7 +13,7 @@ def main():
     #     [4, 5, 6],
     #     [7, 8, 9],
     # ]
-    matrix = [          # Output: 49
+    matrix = [  # Output: 49
         [2, 2, 1],
         [-3, 0, 4],
         [1, -1, 5],
@@ -25,11 +24,7 @@ def main():
     # There is an issue when broadcasting startjob, cause every node will start a new election
     # Need to implement a leader election in progress flag
 
-    packet = Packet(
-        msg_class=StartElectionMessage,
-        data=None,
-        sender=0
-    )
+    packet = Packet(msg_class=StartElectionMessage, data=None, sender=0)
 
     topic = "AtomSpace/broadcast"
     data = PickleSerializer.serialize(packet)
@@ -37,11 +32,7 @@ def main():
 
     sleep(1)
 
-    packet = Packet(
-        msg_class=StartDeterminantJob,
-        data=matrix,
-        sender=0
-    )
+    packet = Packet(msg_class=StartDeterminantJob, data=matrix, sender=0)
 
     topic = "AtomSpace/node_4"
     data = PickleSerializer.serialize(packet)

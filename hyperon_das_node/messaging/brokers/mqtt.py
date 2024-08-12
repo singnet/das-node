@@ -1,12 +1,11 @@
 import logging
 from time import sleep
 
-from paho.mqtt.client import Client
-
 from messaging.broker import MessageBroker
 from messaging.messages.packet import Packet
 from messaging.messages.serializers import PickleSerializer
 from node import AtomSpaceNode
+from paho.mqtt.client import Client
 
 log = logging.getLogger(__name__)
 

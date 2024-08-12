@@ -12,7 +12,7 @@ class MessageBrokerFactory(ABC):
     """
 
     @staticmethod
-    def get_broker(node: "AtomSpaceNode", framework: MessageFramework) -> MessageBroker:
+    def get_broker(framework: MessageFramework) -> type[MessageBroker]:
         """
         Factory method to create a message broker
         Instance of the broker class is returned and there is no reference to this class.
@@ -29,8 +29,6 @@ class MessageBrokerFactory(ABC):
             MessageFramework.MQTT: MQTTBroker,
         }
         try:
-            message_broker = class_name[framework]
+            return class_name[framework]
         except KeyError:
             raise InvalidMessagingFramework(framework)
-
-        return message_broker(node)

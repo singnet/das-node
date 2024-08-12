@@ -1,5 +1,4 @@
 from node import AtomSpaceNode
-from time import sleep
 
 
 class DeterminantNode(AtomSpaceNode):

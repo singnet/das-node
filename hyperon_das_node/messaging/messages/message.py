@@ -1,5 +1,10 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from node import AtomSpaceNode
 
 
 class BaseMessage(ABC):
@@ -8,6 +13,6 @@ class BaseMessage(ABC):
     """
 
     @abstractmethod
-    def act(self, node: "AtomSpaceNode", data: Any) -> None:
+    def act(self, node: AtomSpaceNode, data: Any) -> None:
         """What should be done when receiving a message."""
         raise NotImplementedError
