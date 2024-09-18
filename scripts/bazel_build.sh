@@ -1,6 +1,6 @@
 #!/bin/bash
 
-/opt/bazel/bazelisk build --jobs 6 --noenable_bzlmod //src:atom_space_node_lib
+/opt/bazel/bazelisk build --jobs 6 --noenable_bzlmod //cache_node:cache_node_lib
 
 ##### Current workaround to build nanobind with CMake ######
 cp -r bazel-bin/* ../bin/

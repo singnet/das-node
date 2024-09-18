@@ -7,8 +7,9 @@ docker run \
     --name=$CONTAINER_NAME \
     --volume .:/opt/das-node \
     --workdir /opt/das-node/src \
-    das-node-builder \
-    ../scripts/bazel_build.sh
+    --entrypoint /bin/bash \
+    das-node-builder 
+    # ../scripts/bazel_build.sh
 
 sleep 1
 docker rm $CONTAINER_NAME
