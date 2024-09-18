@@ -9,6 +9,11 @@ Build gpp with bazel
 ./scripts/docker_image_build.sh
 ./scripts/build.sh
 ```
+Inside the container
+
+```sh
+../scripts/bazel_build.sh
+```
 
 On another terminal windoe, build nanobind with Cmake
 -- docker will run on interactive mode, so we can build multiple times
