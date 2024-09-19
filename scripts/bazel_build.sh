@@ -22,7 +22,7 @@ cp -r bazel-src/external/com_github_grpc_grpc/include/grpcpp/ ../bazel_assets
 cp -r bazel-src/external/com_github_grpc_grpc/include/grpc ../bazel_assets/
 cp -r bazel-src/external/com_google_protobuf/src/google/ ../bazel_assets/
 cp bazel-bin/external/com_github_singnet_das_proto/atom_space_node.pb.h ../bazel_assets/
-cp bazel-bin/external/com_github_singnet_das0_proto/atom_space_node.grpc.pb.h ../bazel_assets/
+cp bazel-bin/external/com_github_singnet_das_proto/atom_space_node.grpc.pb.h ../bazel_assets/
 cp bazel-bin/external/com_github_singnet_das_proto/common.pb.h ../bazel_assets/
 ##### ---- ######
 
