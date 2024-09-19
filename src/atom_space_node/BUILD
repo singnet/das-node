@@ -5,7 +5,9 @@ cc_library(
     srcs = glob(["*.cc"]),
     hdrs = glob(["*.h"]),
     includes = ["."],
-    alwayslink=1,
+    alwayslink = 1,
+    linkstatic = 1,
+    features = ["fully_static_link"],
     deps = [
         "@com_github_singnet_das_proto//:atom_space_node_cc_grpc",
         "@com_github_grpc_grpc//:grpc++",
