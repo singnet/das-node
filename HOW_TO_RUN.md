@@ -1,6 +1,7 @@
 Build Docker images
 
 ```sh
+./scripts/docker_image_build.sh
 ```
 
 Build gpp with bazel
@@ -15,7 +16,7 @@ Inside the container
 ../scripts/bazel_build.sh
 ```
 
-On another terminal windoe, build nanobind with Cmake
+On another terminal window, build nanobind with Cmake
 -- docker will run on interactive mode, so we can build multiple times
 
 ```sh
@@ -35,3 +36,4 @@ Still inside the binder container, run Python shell and import `hyperon_das_node
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
 ImportError: /opt/das-node/build/hyperon_das_node.cpython-312-x86_64-linux-gnu.so: undefined symbol: _ZTIN8dasproto13AtomSpaceNode7ServiceE
+```
