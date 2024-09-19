@@ -7,7 +7,6 @@ Build Docker images
 Build gpp with bazel
 -- docker container will run on interactive mode, so we don't loose bazel's cache (Don't close it if you are going to build multiple times)
 ```sh
-./scripts/docker_image_build.sh
 ./scripts/build.sh
 ```
 Inside the container
@@ -20,7 +19,7 @@ On another terminal window, build nanobind with Cmake
 -- docker will run on interactive mode, so we can build multiple times
 
 ```sh
-./scripts/build.sh /scripts/bind.sh
+./scripts/bind.sh
 ```
 Inside the container run:
 
