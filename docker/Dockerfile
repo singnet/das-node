@@ -10,33 +10,24 @@ ARG PROTO_DIR="${BASE_DIR}/proto"
 ARG BAZEL_DIR="${BASE_DIR}/bazel"
 ARG THIRDPARTY="${BASE_DIR}/3rd-party"
 
-RUN mkdir -p ${DAS_NODE_DIR}
-RUN mkdir -p ${DATA_DIR}
-RUN mkdir -p ${GRPC_DIR}
-RUN mkdir -p ${BAZEL_DIR}
-RUN mkdir -p ${PROTO_DIR}
-RUN mkdir -p ${THIRDPARTY}
+RUN mkdir -p ${DAS_NODE_DIR} && mkdir -p ${DATA_DIR} && mkdir -p ${GRPC_DIR}\
+  && mkdir -p ${BAZEL_DIR} && mkdir -p ${PROTO_DIR} && mkdir -p ${THIRDPARTY}
+
 VOLUME ${DAS_NODE_DIR}
 
-RUN apt-get update -y
-RUN apt-get install -y git
+RUN apt-get update &&\
+  apt-get install -y git build-essential autoconf libtool pkg-config curl gcc \
+  protobuf-compiler libmbedcrypto7 python3 pip cmake python3 pip
+
+RUN pip install --no-cache-dir nanobind==2.1.0
 
 RUN cd ${GRPC_DIR} &&\
     git clone https://github.com/grpc/grpc &&\
     cd grpc &&\
     git submodule update --init
 
-RUN apt-get install -y build-essential
-RUN apt-get install -y autoconf
-RUN apt-get install -y libtool
-RUN apt-get install -y pkg-config
-RUN apt-get install -y curl
-RUN apt-get install -y gcc
-RUN apt-get install -y protobuf-compiler
-RUN apt-get install -y libmbedcrypto7
-
 COPY assets/3rd-party.tgz ${THIRDPARTY}
-RUN cd ${THIRDPARTY} &&\
+RUN --mount=type=cache,target=/root/.cache/bazel cd ${THIRDPARTY} &&\
     tar xzvf 3rd-party.tgz &&\
     rm -f 3rd-party.tgz &&\
     mkdir -p ${DAS_NODE_DIR}}/src/3rd-party &&\
@@ -50,8 +41,16 @@ RUN ln -s ${BAZEL_DIR}/bazelisk /usr/bin/bazel
 RUN cd ${GRPC_DIR}/grpc &&\
     ${BAZEL_DIR}/bazelisk build :all
 
-# ADD https://raw.githubusercontent.com/singnet/das-query-engine/master/proto/attention_broker.proto ${PROTO_DIR}
 ADD https://raw.githubusercontent.com/singnet/das-query-engine/master/proto/common.proto ${PROTO_DIR}
 ADD https://raw.githubusercontent.com/singnet/das-query-engine/master/proto/echo.proto ${PROTO_DIR}
 
 WORKDIR /opt/das-node
+
+#COPY source code and relevant info
+COPY . .
+
+#BUILD's cpp application and copy relevant info to bind it to python
+RUN --mount=type=cache,target=/root/.cache/bazel ./scripts/bazel_build.sh
+
+# BIND's to python using nanobind
+RUN cmake -S . -B build && cmake --build build

@@ -1,9 +1,9 @@
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_binary")
 
-cc_library(
+cc_binary(
     name = "hyperon_das_node",
-#    srcs = [],
-#    defines = ["BAZEL_BUILD"],
+    srcs = [],
+    defines = ["BAZEL_BUILD"],
     linkstatic = 1,
     features = ["fully_static_link"],
     deps = [

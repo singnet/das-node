@@ -38,5 +38,6 @@ target_link_libraries(
   hyperon_das_node PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets/libinternal.a
     ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets/libexternal.a
+    # ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets/libenvoy_api.a
 
 )
