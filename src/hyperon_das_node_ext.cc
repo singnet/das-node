@@ -2,8 +2,8 @@
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
 
-#include "src/atom_space_node/AtomSpaceNode.h"
-#include "src/cache_node/CacheNode.h"
+#include "atom_space_node/AtomSpaceNode.h"
+#include "cache_node/CacheNode.h"
 
 namespace nb = nanobind;
 
@@ -11,7 +11,7 @@ using namespace atom_space_node;
 using namespace cache_node;
 
 
-NB_MODULE(hyperon_das_node, m) {
+NB_MODULE(hyperon_das_node_ext, m) {
   //START AtomSpaceNode Class
   nb::class_<AtomSpaceNode>(m, "AtomSpaceNode")
     .def("join_network", &AtomSpaceNode::join_network)

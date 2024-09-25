@@ -1,5 +1,6 @@
 #!/bin/bash
 
+cd src/
 output="../bazel_assets"
 /opt/bazel/bazelisk build --jobs 16 --noenable_bzlmod //:hyperon_das_node
 
@@ -30,7 +31,4 @@ cp bazel-bin/external/com_github_singnet_das_proto/atom_space_node.grpc.pb.h $ou
 cp bazel-bin/external/com_github_singnet_das_proto/atom_space_node.pb.h $output/
 cp bazel-bin/external/com_github_singnet_das_proto/common.pb.h $output/
 
-##### ---- ######
-
-# /opt/bazel/bazelisk clean
-# rm -f bazel-src bazel-out bazel-testlogs bazel-bin
+cd ..

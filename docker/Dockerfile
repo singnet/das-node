@@ -3,7 +3,7 @@ FROM ubuntu:22.04
 ARG BASE_DIR="/opt"
 ARG TMP_DIR="/tmp"
 
-ARG DAS_NODE_DIR="${BASE_DIR}/das-node"
+ARG DAS_NODE_DIR="${BASE_DIR}/hyperon_das_node"
 ARG DATA_DIR="${BASE_DIR}/data"
 ARG GRPC_DIR="${BASE_DIR}/grpc"
 ARG PROTO_DIR="${BASE_DIR}/proto"
@@ -44,13 +44,7 @@ RUN cd ${GRPC_DIR}/grpc &&\
 ADD https://raw.githubusercontent.com/singnet/das-query-engine/master/proto/common.proto ${PROTO_DIR}
 ADD https://raw.githubusercontent.com/singnet/das-query-engine/master/proto/echo.proto ${PROTO_DIR}
 
-WORKDIR /opt/das-node
+WORKDIR "${DAS_NODE_DIR}"
 
 #COPY source code and relevant info
 COPY . .
-
-#BUILD's cpp application and copy relevant info to bind it to python
-RUN --mount=type=cache,target=/root/.cache/bazel ./scripts/bazel_build.sh
-
-# BIND's to python using nanobind
-RUN cmake -S . -B build && cmake --build build
