@@ -2,7 +2,6 @@
 #include <cmath>
 
 #include "gtest/gtest.h"
-#include "test_utils.h"
 #include "LeadershipBroker.h"
 
 using namespace atom_space_node;

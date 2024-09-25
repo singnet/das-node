@@ -2,7 +2,6 @@
 #include <cmath>
 
 #include "gtest/gtest.h"
-#include "test_utils.h"
 #include "Utils.h"
 #include "MessageBroker.h"
 #include "CacheNode.h"
