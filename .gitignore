@@ -169,3 +169,7 @@ poetry.toml
 
 # LSP config files
 pyrightconfig.json
+
+bin/
+bazel_assets
+src/bazel-*
