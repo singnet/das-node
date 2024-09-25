@@ -1,3 +1,3 @@
-from .hyperon_das_node_ext import AtomSpaceNode, cache_node
+from .hyperon_das_node_ext import AtomSpaceNode, Message, cache_node
 
-__all__ = ["AtomSpaceNode", "cache_node"]
+__all__ = ["AtomSpaceNode", "Message", "cache_node"]
