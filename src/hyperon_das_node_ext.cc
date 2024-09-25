@@ -3,6 +3,7 @@
 #include <nanobind/stl/vector.h>
 
 #include "atom_space_node/AtomSpaceNode.h"
+#include "atom_space_node/Message.h"
 #include "cache_node/CacheNode.h"
 
 namespace nb = nanobind;
@@ -12,7 +13,7 @@ using namespace cache_node;
 
 
 NB_MODULE(hyperon_das_node_ext, m) {
-  //START AtomSpaceNode Class
+  //START AtomSpaceNode.h
   nb::class_<AtomSpaceNode>(m, "AtomSpaceNode")
     .def("join_network", &AtomSpaceNode::join_network)
     .def("is_leader", &AtomSpaceNode::is_leader)
@@ -20,13 +21,11 @@ NB_MODULE(hyperon_das_node_ext, m) {
     .def("has_leader", &AtomSpaceNode::has_leader)
     .def("add_peer", &AtomSpaceNode::add_peer, nb::arg("peer_id"))
     .def("node_id", &AtomSpaceNode::node_id)
-    //TODO: the args, argument is collections.abc.Sequence[str], is that okay?
     .def(
       "broadcast",
       &AtomSpaceNode::broadcast,
       nb::arg("command"),
       nb::arg("args"))
-    //TODO: the args, argument is collections.abc.Sequence[str], is that okay?
     .def(
       "send",
       &AtomSpaceNode::send,
@@ -38,7 +37,12 @@ NB_MODULE(hyperon_das_node_ext, m) {
       &AtomSpaceNode::node_joined_network,
       nb::arg("node_id"))
     .def("cast_leadership_vote", &AtomSpaceNode::cast_leadership_vote);
-  //END AtomSpaceNode Class
+  //END AtomSpaceNode.h
+
+  // Start Message.h
+  nb::class_<Message>(m, "Message")
+    .def("act", &Message::act);
+  // End Message.h
 
   // cache_node submodle
   nb::module_ cache_node = m.def_submodule("cache_node");
