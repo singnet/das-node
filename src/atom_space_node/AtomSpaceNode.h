@@ -63,6 +63,20 @@ public:
     // Public API
 
     /**
+     * Basic constructor.
+     *
+     * @param node_id The ID of this node. Typically is a string to identify this node
+     * in the MessageBroker.
+     * @param leadership_algorithm The concrete class to be used as leadership broker.
+     * @param messaging_backend The concrete class to be used as message broker.
+     */
+    AtomSpaceNode(
+        const string &node_id,
+        LeadershipBrokerType leadership_algorithm,
+        MessageBrokerType messaging_backend
+    );
+
+    /**
      * Joins a network of similar nodes.
      */
     void join_network();
@@ -153,20 +167,6 @@ protected:
 
     // --------------------------------------------------------------------------------------------
     // Protected API
-
-    /**
-     * Basic constructor.
-     *
-     * @param node_id The ID of this node. Typically is a string to identify this node
-     * in the MessageBroker.
-     * @param leadership_algorithm The concrete class to be used as leadership broker.
-     * @param messaging_backend The concrete class to be used as message broker.
-     */
-    AtomSpaceNode(
-        const string &node_id,
-        LeadershipBrokerType leadership_algorithm,
-        MessageBrokerType messaging_backend
-    );
 
     /**
      * Build the Message object which is supposed to execute the passed command.
