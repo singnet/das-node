@@ -16,6 +16,14 @@ using namespace std;
 using namespace atom_space_node;
 using namespace cache_node;
 
+class MessageFactoryTrampoline : public MessageFactory {
+public:
+  NB_TRAMPOLINE(MessageFactory, 1);
+  Message *message_factory(string &command, vector<string> &args) override {
+    NB_OVERRIDE_PURE(message_factory, command, args);
+  };
+};
+
 class AtomSpaceNodeTrampoline : public AtomSpaceNode {
 public:
   NB_TRAMPOLINE(AtomSpaceNode, 3);
@@ -41,6 +49,8 @@ NB_MODULE(hyperon_das_node_ext, m) {
   // Message.h
   nb::class_<Message>(m, "Message")
     .def("act", &Message::act);
+  nb::class_<MessageFactory, MessageFactoryTrampoline>(m, "MessageFactory")
+    .def("message_factory", &MessageFactory::message_factory);
   // end Message.h
 
   // LeadershipBroker.h
@@ -75,7 +85,7 @@ NB_MODULE(hyperon_das_node_ext, m) {
   // end MessageBroker.h
 
   // AtomSpaceNode.h
-  nb::class_<AtomSpaceNode, AtomSpaceNodeTrampoline>(m, "AtomSpaceNode")
+  nb::class_<AtomSpaceNode, MessageFactory, AtomSpaceNodeTrampoline>(m, "AtomSpaceNode")
     .def(nb::init<string, LeadershipBrokerType, MessageBrokerType>(), "node_id"_a, "leadership_algorithm"_a, "messaging_backend"_a)
     .def("join_network", &AtomSpaceNode::join_network)
     .def("is_leader", &AtomSpaceNode::is_leader)
