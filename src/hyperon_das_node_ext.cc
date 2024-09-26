@@ -16,6 +16,7 @@ using namespace std;
 using namespace atom_space_node;
 using namespace cache_node;
 
+// Python trampolines
 class MessageFactoryTrampoline : public MessageFactory {
 public:
   NB_TRAMPOLINE(MessageFactory, 1);
@@ -38,33 +39,43 @@ public:
   };
 };
 
+
+// Exposing protected methods
+
 class AtomSpaceNodePublicist : public AtomSpaceNode {
 public:
-  using AtomSpaceNode::AtomSpaceNode;
   using AtomSpaceNode::message_factory;
 };
 
+Message *n_message(MessageFactory *factory, string &command, vector<string> &args) {
+  return factory->message_factory(command, args);
+}
+
+
+
 
 NB_MODULE(hyperon_das_node_ext, m) {
-  // Message.h
+
+  m.def("n_message", &n_message);
+  // Message.h bindings
   nb::class_<Message>(m, "Message")
     .def("act", &Message::act);
+
   nb::class_<MessageFactory, MessageFactoryTrampoline>(m, "MessageFactory")
     .def("message_factory", &MessageFactory::message_factory);
-  // end Message.h
 
-  // LeadershipBroker.h
+  // LeadershipBroker.h bindings
   nb::enum_<LeadershipBrokerType>(m, "LeadershipBrokerType")
     .value("SINGLE_MASTER_SERVER", LeadershipBrokerType::SINGLE_MASTER_SERVER);
+
   nb::class_<LeadershipBroker>(m, "LeadershipBroker")
     .def_static("factory", &LeadershipBroker::factory)
     .def("leader_id", &LeadershipBroker::leader_id)
     .def("set_leader_id", &LeadershipBroker::set_leader_id)
     .def("has_leader", &LeadershipBroker::has_leader)
     .def("set_message_broker", &LeadershipBroker::set_message_broker);
-  // end LeadershipBroker.h
 
-  // MessageBroker.h
+  // MessageBroker.h bindings
   nb::enum_<MessageBrokerType>(m, "MessageBrokerType")
     .value("GRPC", MessageBrokerType::GRPC);
   nb::class_<MessageBroker>(m, "MessageBroker")
@@ -82,9 +93,8 @@ NB_MODULE(hyperon_das_node_ext, m) {
       "command"_a,
       "args"_a,
       "recipient"_a);
-  // end MessageBroker.h
 
-  // AtomSpaceNode.h
+  // AtomSpaceNode.h bindings
   nb::class_<AtomSpaceNode, MessageFactory, AtomSpaceNodeTrampoline>(m, "AtomSpaceNode")
     .def(nb::init<string, LeadershipBrokerType, MessageBrokerType>(), "node_id"_a, "leadership_algorithm"_a, "messaging_backend"_a)
     .def("join_network", &AtomSpaceNode::join_network)
@@ -107,7 +117,6 @@ NB_MODULE(hyperon_das_node_ext, m) {
       "node_id"_a)
     .def("cast_leadership_vote", &AtomSpaceNode::cast_leadership_vote)
     .def("message_factory", &AtomSpaceNodePublicist::message_factory);
-  //end atomspacenode.h
 
   // cache_node submodle
   nb::module_ cache_node = m.def_submodule("cache_node");
