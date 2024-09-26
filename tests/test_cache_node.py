@@ -4,7 +4,7 @@ from hyperon_das_node.cache_node import CacheNodeServer, CacheNodeClient
 
 class TestCacheNode(TestCase):
 
-    def setUp(self):
+    def test_cache_node(self):
         self.server_id: str = "localhost:35700"
         self.client1_id: str = "localhost:35701"
         self.client2_id: str = "localhost:35702"
@@ -13,7 +13,6 @@ class TestCacheNode(TestCase):
         self.client1 = CacheNodeClient(self.client1_id, self.server_id)
         self.client2 = CacheNodeClient(self.client2_id, self.server_id)
 
-    def test_initial_state(self):
         # There should be no leader
         self.assertFalse(self.server.has_leader())
         self.assertFalse(self.client1.has_leader())
@@ -34,7 +33,6 @@ class TestCacheNode(TestCase):
         self.assertEqual(self.client2.node_id(), self.client2_id)
 
 
-    def test_join_network(self):
         self.server.join_network()
         self.client1.join_network()
         self.client2.join_network()
