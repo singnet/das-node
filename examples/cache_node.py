@@ -1,4 +1,5 @@
-from hyperon_das_node import AtomSpaceNode, Message, LeadershipBrokerType, MessageBrokerType
+from hyperon_das_node import AtomSpaceNode, Message, LeadershipBrokerType, MessageBrokerType, n_message
+from collections.abc import Sequence
 
 class PrintMessage(Message):
     def __init__(self, content: str):
@@ -24,13 +25,19 @@ class CacheNode(AtomSpaceNode):
     def print_content(self, content: str):
         print(content)
 
-    def message_fatctory(self, command: str, args: list[str]) -> Message:
-        breakpoint()
+    def message_factory(self, command: str, args: Sequence[str]) -> Message:
+        print(f"{self=}")
+        print(f"Inside message_factory, {command=}, {args=}")
         message = super().message_factory(command, args)
+        print(f"{message=}")
         if message is not None:
+            print("Returning message")
             return message
-        if klass := self.known_commands.get(command):
-            return klass(*args)
+        if klass := self.known_commands.get(command, None):
+            print(f"{klass=}")
+            message = klass(args[0])
+            print(message)
+            return message
 
         return None
 
@@ -61,7 +68,9 @@ class CacheNodeClient(CacheNode):
 if __name__ == "__main__":
     server = CacheNodeServer("localhost:35700")
     client = CacheNodeClient("localhost:35701", "localhost:35700")
+
+    # message = n_message(server, "print", ["something"])
     server.join_network()
     client.join_network()
 
-    client.send("print", ["something"], "localhost:35700")
+    # client.send("print", ["something"], "localhost:35700")
