@@ -16,6 +16,7 @@ using namespace commons;
 namespace atom_space_node {
 
 enum class MessageBrokerType {
+    RAM,
     GRPC
 };
 
@@ -49,6 +50,15 @@ public:
             const string &node_id);
 
     /**
+     * Basic constructor
+     *
+     * @param host_node The object responsible for building Message objects. Typically, it's The
+     * node this MessageBroker belongs to.
+     * @param node_id The ID of the AtomSpaceNode this MessageBroker belongs to.
+     */
+    MessageBroker(MessageFactory *host_node, const string &node_id);
+
+    /**
      * Destructor.
      */
     virtual ~MessageBroker();
@@ -59,6 +69,14 @@ public:
      * @param peer_id The ID of the newly known peer.
      */
     virtual void add_peer(const string &peer_id);
+
+    /**
+     * Returns true iff the passed peer has been previously added
+     *
+     * @param peer_id Peer id being checked.
+     * @return true iff the passed peer has been previously added
+     */
+    bool is_peer(const string &peer_id);
 
     // ----------------------------------------------------------------
     // Public abstract API
@@ -93,17 +111,6 @@ public:
         const vector<string> &args, 
         const string &recipient) = 0;
 
-protected:
-
-    /**
-     * Basic constructor
-     *
-     * @param host_node The object responsible for building Message objects. Typically, it's The
-     * node this MessageBroker belongs to.
-     * @param node_id The ID of the AtomSpaceNode this MessageBroker belongs to.
-     */
-    MessageBroker(MessageFactory *host_node, const string &node_id);
-
     MessageFactory *host_node;
     unordered_set<string> peers;
     mutex peers_mutex;
@@ -112,6 +119,78 @@ protected:
 
 // -------------------------------------------------------------------------------------------------
 // Concrete subclasses
+
+/**
+ * Concrete implementation of MessageBroker using shared queues in RAM to exchange Message among
+ * nodes.
+ *
+ * Nodes are supposed to be running in the same runtime process.
+ */
+class SynchronousSharedRAM : public MessageBroker {
+
+public:
+
+    /**
+     * Basic constructor
+     *
+     * @param host_node The object responsible for building Message objects. Typically, it's The
+     * node this MessageBroker belongs to.
+     */
+    SynchronousSharedRAM(MessageFactory *host_node, const string &node_id);
+
+    /**
+     * Destructor.
+     */
+    ~SynchronousSharedRAM();
+
+    // ----------------------------------------------------------------
+    // Public MessageBroker abstract API
+
+    /**
+     * Inserts the host node into the network.
+     *
+     * Initialize incoming messages queue and starts a thread to process it
+     */
+    virtual void join_network();
+
+    /**
+     * Broadcasts a command to all nodes in the network.
+     *
+     * All nodes in the network will be reached (not only the known peers) and the command
+     * will be executed. Basically the Message is sent to all known peers which, in their turns,
+     * re-send it to their known peers until there's no other peer to spread it. The GRPC object
+     * used to send the request contains a list of visited nodes so a request is never re-sent
+     * to nodes that have already received it.
+     *
+     * @param command The command to be executed in the target nodes.
+     * @param args Arguments for the command.
+     */
+    virtual void broadcast(const string &command, const vector<string> &args);
+
+    /**
+     * Sends a command to the passed node.
+     *
+     * The target node is supposed to be a known peer. If not, an exception is thrown.
+     * Uses the client GRPC channel to send the command to the target.
+     *
+     * @param command The command to be executed in the target nodes.
+     * @param args Arguments for the command.
+     * @recipient The target node for the command.
+     */
+    virtual void send(const string &command, const vector<string> &args, const string &recipient);
+
+private:
+
+    static unsigned int MESSAGE_THREAD_COUNT;
+    static unordered_map<string, RequestQueue *> NODE_QUEUE;
+    static mutex NODE_QUEUE_MUTEX;
+
+    vector<thread *> inbox_threads;
+    RequestQueue incoming_messages; // Thread safe container
+
+    // Methods used to start threads
+    void inbox_thread_method();
+};
 
 /**
  * Concrete implementation of MessageBroker using GRPC to exchange Message among nodes.
@@ -250,6 +329,20 @@ private:
     void inbox_thread_method();
     void outbox_thread_method();
 };
+
+// -------------------------------------------------------------------------------------------------
+// Common utility classes
+
+class CommandLinePackage {
+    public:
+        CommandLinePackage(const string &command, const vector<string> &args);
+        ~CommandLinePackage();
+        string command;
+        vector<string> args;
+        bool is_broadcast;
+        unordered_set<string> visited;
+};
+
 
 } // namespace atom_space_node
 

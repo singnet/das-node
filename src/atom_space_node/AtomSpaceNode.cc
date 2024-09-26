@@ -33,6 +33,7 @@ void AtomSpaceNode::join_network() {
     vector<string> args;
     args.push_back(this->node_id());
     this->message_broker->broadcast(this->known_commands.NODE_JOINED_NETWORK, args);
+    Utils::sleep(1000);
 }
 
 bool AtomSpaceNode::is_leader() {
@@ -66,9 +67,6 @@ void AtomSpaceNode::send(
 
     this->message_broker->send(command, args, recipient);
 }
-
-// -------------------------------------------------------------------------------------------------
-// Protected API
 
 Message *AtomSpaceNode::message_factory(string &command, vector<string> &args) {
     if (command == this->known_commands.NODE_JOINED_NETWORK) {

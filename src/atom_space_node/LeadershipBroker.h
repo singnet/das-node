@@ -35,6 +35,11 @@ public:
     static LeadershipBroker *factory(LeadershipBrokerType instance_type);
 
     /**
+     * Basic empty constructor
+     */
+    LeadershipBroker();
+
+    /**
      * Destructor.
      */
     virtual ~LeadershipBroker();
@@ -75,9 +80,6 @@ public:
      */
     virtual void start_leader_election(const string &my_vote) = 0;
 
-protected:
-
-    LeadershipBroker();
 
 private:
 
@@ -114,7 +116,6 @@ public:
 
     void start_leader_election(const string &my_vote);
 };
-
 
 } // namespace atom_space_node
 

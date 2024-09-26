@@ -18,6 +18,7 @@ class RequestQueue {
 public:
 
     RequestQueue(unsigned int initial_size = 1000); // Basic constructor
+
     ~RequestQueue(); /// Destructor.
 
     /**

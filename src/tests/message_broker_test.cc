@@ -9,7 +9,7 @@
 using namespace atom_space_node;
 using namespace cache_node;
 
-class TestNode {
+class TestCacheNode {
 public: 
     string command;
     vector<string> args;
@@ -18,18 +18,18 @@ public:
 
 class TestCacheNodeClient;
 
-class TestMessage : public Message {
+class TestCacheMessage : public Message {
 public:
     string command;
     vector<string> args;
-    TestMessage(string command, vector<string> args) {
+    TestCacheMessage(string command, vector<string> args) {
         this->command = command;
         this->args = args;
     }
     void act(AtomSpaceNode *_node);
 };
 
-class TestCacheNodeServer : public TestNode, public CacheNodeServer {
+class TestCacheNodeServer : public TestCacheNode, public CacheNodeServer {
 public:
     TestCacheNodeServer(const string &node_id) : CacheNodeServer(node_id) {
         this->command = "";
@@ -45,13 +45,13 @@ public:
             return message;
         }
         if (command == "c1" || command == "c2" || command == "c3") {
-            return new TestMessage(command, args);
+            return new TestCacheMessage(command, args);
         }
         return NULL;
     }
 };
 
-class TestCacheNodeClient : public TestNode, public CacheNodeClient {
+class TestCacheNodeClient : public TestCacheNode, public CacheNodeClient {
 public:
     TestCacheNodeClient(const string &node_id, string &server_id) : CacheNodeClient(node_id, server_id) {
         this->command = "";
@@ -67,16 +67,16 @@ public:
             return message;
         }
         if (command == "c1" || command == "c2" || command == "c3") {
-            return new TestMessage(command, args);
+            return new TestCacheMessage(command, args);
         }
         return NULL;
     }
 };
 
-void TestMessage::act(AtomSpaceNode *_node) {
+void TestCacheMessage::act(AtomSpaceNode *_node) {
     TestCacheNodeClient *node = (TestCacheNodeClient *) _node;
-    ((TestNode *) node)->command = this->command;
-    ((TestNode *) node)->args = this->args;
+    ((TestCacheNode *) node)->command = this->command;
+    ((TestCacheNode *) node)->args = this->args;
 }
 
 TEST(MessageBroker, basics) {
@@ -89,9 +89,13 @@ TEST(MessageBroker, basics) {
         FAIL() << "Expected std::runtime_error";
     }
 
-    SynchronousGRPC *message_broker = (SynchronousGRPC *)
+    SynchronousSharedRAM *message_broker_ram = (SynchronousSharedRAM *)
+        MessageBroker::factory(MessageBrokerType::RAM, NULL, "");
+    EXPECT_TRUE(message_broker_ram != NULL);
+
+    SynchronousGRPC *message_broke_grpc = (SynchronousGRPC *)
         MessageBroker::factory(MessageBrokerType::GRPC, NULL, "");
-    EXPECT_TRUE(message_broker != NULL);
+    EXPECT_TRUE(message_broke_grpc != NULL);
 }
 
 TEST(CacheNode, basics) {

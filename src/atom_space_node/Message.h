@@ -39,8 +39,6 @@ public:
      */
     virtual void act(AtomSpaceNode *node) = 0;
 
-protected:
-
     /**
      * Empty constructor.
      */
