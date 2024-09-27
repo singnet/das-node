@@ -37,39 +37,44 @@ class TestAtomSpaceNode(TestCase):
         client1_id = "localhost:30701"
         client2_id = "localhost:30702"
 
-        messaging_type = MessageBrokerType.RAM
+        # Run the same tests using RAM and GRPC messaging backend
+        # (Senna) GRPC is unstable, I'm already trying to fix it
+        # for messaging_type in [MessageBrokerType.RAM, MessageBrokerType.GRPC]:
+        for messaging_type in [MessageBrokerType.RAM]:
 
-        server = TestNode(server_id, server_id, LeadershipBrokerType.SINGLE_MASTER_SERVER, messaging_type, False)
-        client1 = TestNode(client1_id, server_id, LeadershipBrokerType.SINGLE_MASTER_SERVER, messaging_type, False)
-        client2 = TestNode(client2_id, server_id, LeadershipBrokerType.SINGLE_MASTER_SERVER, messaging_type, False)
+            server = TestNode(server_id, server_id, LeadershipBrokerType.SINGLE_MASTER_SERVER, messaging_type, False)
+            client1 = TestNode(client1_id, server_id, LeadershipBrokerType.SINGLE_MASTER_SERVER, messaging_type, False)
+            client2 = TestNode(client2_id, server_id, LeadershipBrokerType.SINGLE_MASTER_SERVER, messaging_type, False)
 
-        assert not server.is_leader()
-        assert not client1.is_leader()
-        assert not client2.is_leader()
-        assert not server.has_leader()
-        assert not client1.has_leader()
-        assert not client2.has_leader()
-        assert server.leader_id() == ""
-        assert client1.leader_id() == ""
-        assert client2.leader_id() == ""
-        assert server.node_id() == server_id
-        assert client1.node_id() == client1_id
-        assert client2.node_id() == client2_id
+            # Check state before joining network
+            assert not server.is_leader()
+            assert not client1.is_leader()
+            assert not client2.is_leader()
+            assert not server.has_leader()
+            assert not client1.has_leader()
+            assert not client2.has_leader()
+            assert server.leader_id() == ""
+            assert client1.leader_id() == ""
+            assert client2.leader_id() == ""
+            assert server.node_id() == server_id
+            assert client1.node_id() == client1_id
+            assert client2.node_id() == client2_id
 
-        server.join_network()
-        client1.join_network()
-        client2.join_network()
+            server.join_network()
+            client1.join_network()
+            client2.join_network()
 
-        assert server.is_leader()
-        assert not client1.is_leader()
-        assert not client2.is_leader()
-        assert server.has_leader()
-        assert client1.has_leader()
-        assert client2.has_leader()
-        assert server.leader_id() == server_id
-        assert client1.leader_id() == server_id
-        assert client2.leader_id() == server_id
-        assert server.node_id() == server_id
-        assert client1.node_id() == client1_id
-        assert client2.node_id() == client2_id
+            # Check state after joining network
+            assert server.is_leader()
+            assert not client1.is_leader()
+            assert not client2.is_leader()
+            assert server.has_leader()
+            assert client1.has_leader()
+            assert client2.has_leader()
+            assert server.leader_id() == server_id
+            assert client1.leader_id() == server_id
+            assert client2.leader_id() == server_id
+            assert server.node_id() == server_id
+            assert client1.node_id() == client1_id
+            assert client2.node_id() == client2_id
 
