@@ -1,6 +1,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
+#include <nanobind/stl/unique_ptr.h>
 #include <nanobind/trampoline.h>
 
 #include "atom_space_node/AtomSpaceNode.h"
@@ -16,11 +17,13 @@ using namespace std;
 using namespace atom_space_node;
 using namespace cache_node;
 
+using MessagePtr = std::unique_ptr<Message>;
+
 // Python trampolines
 class MessageFactoryTrampoline : public MessageFactory {
 public:
   NB_TRAMPOLINE(MessageFactory, 1);
-  Message *message_factory(string &command, vector<string> &args) override {
+  MessagePtr message_factory(string &command, vector<string> &args) override {
     NB_OVERRIDE_PURE(message_factory, command, args);
   };
 };
@@ -28,7 +31,7 @@ public:
 class AtomSpaceNodeTrampoline : public AtomSpaceNode {
 public:
   NB_TRAMPOLINE(AtomSpaceNode, 3);
-  Message *message_factory(string &command, vector<string> &args) override {
+  MessagePtr message_factory(string &command, vector<string> &args) override {
     NB_OVERRIDE(message_factory, command, args);
   };
   void node_joined_network(const string &node_id) override {
@@ -47,16 +50,11 @@ public:
   using AtomSpaceNode::message_factory;
 };
 
-Message *n_message(MessageFactory *factory, string &command, vector<string> &args) {
-  return factory->message_factory(command, args);
-}
-
 
 
 
 NB_MODULE(hyperon_das_node_ext, m) {
 
-  m.def("n_message", &n_message);
   // Message.h bindings
   nb::class_<Message>(m, "Message")
     .def("act", &Message::act);
@@ -117,7 +115,12 @@ NB_MODULE(hyperon_das_node_ext, m) {
       &AtomSpaceNode::node_joined_network,
       "node_id"_a)
     .def("cast_leadership_vote", &AtomSpaceNode::cast_leadership_vote)
-    .def("message_factory", &AtomSpaceNodePublicist::message_factory);
+    .def(
+      "message_factory",
+      &AtomSpaceNodePublicist::message_factory,
+      "command"_a,
+      "args"_a)
+    ;
 
   // cache_node submodle
   nb::module_ cache_node = m.def_submodule("cache_node");

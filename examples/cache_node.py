@@ -24,13 +24,14 @@ class CacheNode(AtomSpaceNode):
     def print_content(self, content: str):
         print(content)
 
-    def message_fatctory(self, command: str, args: list[str]) -> Message:
-        breakpoint()
+    def message_factory(self, command: str, args: list[str]) -> Message:
+        """
+        """
         message = super().message_factory(command, args)
         if message is not None:
             return message
-        if klass := self.known_commands.get(command):
-            return klass(*args)
+
+        return PrintMessage("anything")
 
         return None
 
@@ -64,4 +65,4 @@ if __name__ == "__main__":
     server.join_network()
     client.join_network()
 
-    client.send("print", ["something"], "localhost:35700")
+    # client.send("print", ["something"], "localhost:35700")
