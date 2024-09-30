@@ -56,8 +56,3 @@ class TestCacheNode(TestCase):
         self.assertEqual(self.server.node_id(), self.server_id)
         self.assertEqual(self.client1.node_id(), self.client1_id)
         self.assertEqual(self.client2.node_id(), self.client2_id)
-
-        del self.server
-        del self.client1
-        del self.client2
-
