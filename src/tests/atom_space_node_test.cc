@@ -159,9 +159,9 @@ TEST(AtomSpaceNode, communication) {
     TestNode *client1;
     TestNode *client2;
 
-    unsigned int num_tests = 20;
+    unsigned int num_repetitions = 20;
     MessageBrokerType messaging_type;
-    for (unsigned int i = 0; i < num_tests; i++) {
+    for (unsigned int i = 0; i < num_repetitions; i++) {
         if (Utils::flip_coin()) {
             messaging_type = MessageBrokerType::RAM;
         } else {
