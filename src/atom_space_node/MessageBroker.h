@@ -334,7 +334,7 @@ public:
 private:
 
     static unsigned int MESSAGE_THREAD_COUNT;
-    std::unique_ptr<grpc::Server> *grpc_server;
+    std::unique_ptr<grpc::Server> grpc_server;
     thread *grpc_thread;
     vector<thread *> inbox_threads;
     vector<thread *> outbox_threads;

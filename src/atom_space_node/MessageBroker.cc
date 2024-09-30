@@ -85,7 +85,7 @@ SynchronousGRPC::~SynchronousGRPC() {
     for (auto thread: outbox_threads) {
         thread->join();
     }
-    (*grpc_server)->Shutdown();
+    grpc_server->Shutdown();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -100,8 +100,8 @@ void SynchronousGRPC::grpc_thread_method() {
     builder.RegisterService(this);
     std::cout << "SynchronousGRPC listening on " << server_address << std::endl;
     std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-    grpc_server = &server;
-    (*grpc_server)->Wait();
+    grpc_server = std::move(server);
+    grpc_server->Wait();
 }
 
 void SynchronousSharedRAM::inbox_thread_method() {
@@ -128,16 +128,14 @@ void SynchronousSharedRAM::inbox_thread_method() {
                 }
                 this->peers_mutex.unlock();
             }
-            Message *message = this->host_node->message_factory(message_data->command, message_data->args);
-            if (message == NULL) {
+            std::unique_ptr<Message> message = this->host_node->message_factory(message_data->command, message_data->args);
+            if (! message) {
                 Utils::error("Invalid NULL Message");
             }
             if (this->host_node == NULL) {
                 Utils::error("Invalid NULL host_node");
             }
             message->act((AtomSpaceNode *) this->host_node);
-            // TODO: fix memory leak
-            //delete message;
             delete message_data;
         } else {
             if (this->is_shutting_down()) {
@@ -189,16 +187,14 @@ void SynchronousGRPC::inbox_thread_method() {
             for (int i = 0; i < num_args; i++) {
                 args.push_back(message_data->args(i));
             }
-            Message *message = this->host_node->message_factory(command, args);
-            if (message == NULL) {
+            std::unique_ptr<Message> message = this->host_node->message_factory(command, args);
+            if (! message) {
                 Utils::error("Invalid NULL Message");
             }
             if (this->host_node == NULL) {
                 Utils::error("Invalid NULL host_node");
             }
             message->act((AtomSpaceNode *) this->host_node);
-            // TODO: fix memory leak
-            // delete message;
         } else {
             if (this->is_shutting_down()) {
                 stop_flag = true;

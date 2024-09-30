@@ -68,10 +68,10 @@ void AtomSpaceNode::send(
     this->message_broker->send(command, args, recipient);
 }
 
-Message *AtomSpaceNode::message_factory(string &command, vector<string> &args) {
+std::unique_ptr<Message> AtomSpaceNode::message_factory(string &command, vector<string> &args) {
     if (command == this->known_commands.NODE_JOINED_NETWORK) {
-        return new NodeJoinedNetwork(args[0]);
+        return std::unique_ptr<Message>(new NodeJoinedNetwork(args[0]));
     } else {
-        return NULL;
+        return std::unique_ptr<Message>{};
     }
 }

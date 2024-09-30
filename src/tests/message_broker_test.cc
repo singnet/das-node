@@ -39,15 +39,15 @@ public:
         CacheNodeServer::node_joined_network(node_id);
         this->node_joined_network_count += 1;
     }
-    Message *message_factory(string &command, vector<string> &args) {
-        Message *message = CacheNode::message_factory(command, args);
-        if (message != NULL) {
+    std::unique_ptr<Message> message_factory(string &command, vector<string> &args) {
+        std::unique_ptr<Message> message = CacheNode::message_factory(command, args);
+        if (message) {
             return message;
         }
         if (command == "c1" || command == "c2" || command == "c3") {
-            return new TestCacheMessage(command, args);
+            return std::unique_ptr<Message>(new TestCacheMessage(command, args));
         }
-        return NULL;
+        return std::unique_ptr<Message>{};
     }
 };
 
@@ -61,15 +61,15 @@ public:
         CacheNodeClient::node_joined_network(node_id);
         this->node_joined_network_count += 1;
     }
-    Message *message_factory(string &command, vector<string> &args) {
-        Message *message = CacheNode::message_factory(command, args);
-        if (message != NULL) {
+    std::unique_ptr<Message> message_factory(string &command, vector<string> &args) {
+        std::unique_ptr<Message> message = CacheNode::message_factory(command, args);
+        if (message) {
             return message;
         }
         if (command == "c1" || command == "c2" || command == "c3") {
-            return new TestCacheMessage(command, args);
+            return std::unique_ptr<Message>(new TestCacheMessage(command, args));
         }
-        return NULL;
+        return std::unique_ptr<Message>{};
     }
 };
 
