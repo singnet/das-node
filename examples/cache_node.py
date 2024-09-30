@@ -2,6 +2,7 @@ from hyperon_das_node import AtomSpaceNode, Message, LeadershipBrokerType, Messa
 
 class PrintMessage(Message):
     def __init__(self, content: str):
+        super().__init__()
         self.content = content
 
     def act(node: "CacheNode") -> None:
@@ -30,10 +31,10 @@ class CacheNode(AtomSpaceNode):
         message = super().message_factory(command, args)
         if message is not None:
             return message
+        message = PrintMessage("anything")
+        print(message)
 
-        return PrintMessage("anything")
-
-        return None
+        return message or None
 
 class CacheNodeServer(CacheNode):
     def __init__(self, node_id: str) -> None:
@@ -65,4 +66,4 @@ if __name__ == "__main__":
     server.join_network()
     client.join_network()
 
-    # client.send("print", ["something"], "localhost:35700")
+    client.send("print", ["something"], "localhost:35700")

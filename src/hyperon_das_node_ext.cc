@@ -20,6 +20,15 @@ using namespace cache_node;
 using MessagePtr = std::unique_ptr<Message>;
 
 // Python trampolines
+
+class MessageTrampoline : public Message {
+public:
+  NB_TRAMPOLINE(Message, 1);
+  void act(AtomSpaceNode *node) override {
+    NB_OVERRIDE_PURE(act, node);
+  };
+};
+
 class MessageFactoryTrampoline : public MessageFactory {
 public:
   NB_TRAMPOLINE(MessageFactory, 1);
@@ -43,10 +52,13 @@ public:
 };
 
 
+
+
 NB_MODULE(hyperon_das_node_ext, m) {
 
   // Message.h bindings
-  nb::class_<Message>(m, "Message")
+  nb::class_<Message, MessageTrampoline>(m, "Message")
+    .def(nb::init<>())
     .def("act", &Message::act);
 
   nb::class_<MessageFactory, MessageFactoryTrampoline>(m, "MessageFactory")
@@ -105,12 +117,17 @@ NB_MODULE(hyperon_das_node_ext, m) {
       &AtomSpaceNode::node_joined_network,
       "node_id"_a)
     .def("cast_leadership_vote", &AtomSpaceNode::cast_leadership_vote)
-    .def(
-      "message_factory",
-      &AtomSpaceNode::message_factory,
-      "command"_a,
-      "args"_a)
-    ;
+    .def("message_factory",
+      [](
+        AtomSpaceNode& self,
+        string& command,
+        vector<string>& args
+      ) -> unique_ptr<Message, nb::deleter<Message>> {
+        auto message = self.message_factory(command, args);
+        if (!message) { return nullptr; }
+        return unique_ptr<Message, nb::deleter<Message>>(message.release(), nb::deleter<Message>());
+      }
+    );
 
   // cache_node submodle
   nb::module_ cache_node = m.def_submodule("cache_node");
