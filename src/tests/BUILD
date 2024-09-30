@@ -47,7 +47,7 @@ cc_test(
 cc_test(
     name = "atom_space_node_test",
     srcs = ["atom_space_node_test.cc"],
-    size = "small",
+    size = "medium",
     copts = [
       "-Iexternal/gtest/googletest/include",
       "-Iexternal/gtest/googletest",

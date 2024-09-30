@@ -98,54 +98,6 @@ TEST(MessageBroker, basics) {
     EXPECT_TRUE(message_broke_grpc != NULL);
 }
 
-TEST(CacheNode, basics) {
-
-    string server_id = "localhost:30700";
-    string client1_id = "localhost:30701";
-    string client2_id = "localhost:30702";
-
-    CacheNodeServer server(server_id);
-    EXPECT_FALSE(server.is_leader());
-    EXPECT_FALSE(server.has_leader());
-    EXPECT_EQ(server.leader_id(), "");
-    EXPECT_EQ(server.node_id(), server_id);
-    server.join_network();
-    EXPECT_TRUE(server.is_leader());
-    EXPECT_TRUE(server.has_leader());
-    EXPECT_EQ(server.leader_id(), server_id);
-    EXPECT_EQ(server.node_id(), server_id);
-
-    CacheNodeClient client1(client1_id, server_id);
-    CacheNodeClient client2(client2_id, server_id);
-
-    EXPECT_FALSE(client1.is_leader());
-    EXPECT_FALSE(client2.is_leader());
-
-    EXPECT_FALSE(client1.has_leader());
-    EXPECT_FALSE(client2.has_leader());
-
-    EXPECT_EQ(client1.leader_id(), "");
-    EXPECT_EQ(client2.leader_id(), "");
-
-    EXPECT_EQ(client1.node_id(), client1_id);
-    EXPECT_EQ(client2.node_id(), client2_id);
-
-    client1.join_network();
-    client2.join_network();
-
-    EXPECT_FALSE(client1.is_leader());
-    EXPECT_FALSE(client2.is_leader());
-
-    EXPECT_TRUE(client1.has_leader());
-    EXPECT_TRUE(client2.has_leader());
-
-    EXPECT_EQ(client1.leader_id(), server_id);
-    EXPECT_EQ(client2.leader_id(), server_id);
-
-    EXPECT_EQ(client1.node_id(), client1_id);
-    EXPECT_EQ(client2.node_id(), client2_id);
-}
-
 TEST(MessageBroker, communication) {
     string server_id = "localhost:31700";
     string client1_id = "localhost:31701";

@@ -63,6 +63,9 @@ public:
      */
     virtual ~MessageBroker();
 
+    // ----------------------------------------------------------------
+    // Public concrete API
+
     /**
      * Adds a new peer to the list of known nodes.
      *
@@ -77,6 +80,19 @@ public:
      * @return true iff the passed peer has been previously added
      */
     bool is_peer(const string &peer_id);
+
+    /**
+     * Gracefully shuts down threads or any other resources being used in communication.
+     */
+    void graceful_shutdown();
+
+    /**
+     * Returns true iff this MessageBroker is shuting down.
+     *
+     * The idea is to allow concrete subclasses to know when a graceful shutdown has been requested
+     * so threads or any other resources being used in communication can be stoped/released/etc.
+     */
+    bool is_shutting_down();
 
     // ----------------------------------------------------------------
     // Public abstract API
@@ -115,6 +131,8 @@ public:
     unordered_set<string> peers;
     mutex peers_mutex;
     string node_id;
+    bool shutdown_flag;
+    mutex shutdown_flag_mutex;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -316,13 +334,12 @@ public:
 private:
 
     static unsigned int MESSAGE_THREAD_COUNT;
+    std::unique_ptr<grpc::Server> *grpc_server;
     thread *grpc_thread;
     vector<thread *> inbox_threads;
     vector<thread *> outbox_threads;
     RequestQueue incoming_messages; // Thread safe container
     RequestQueue outgoing_messages; // Thread safe container
-    // Client GRPC channels
-    unordered_map<string, unique_ptr<dasproto::AtomSpaceNode::Stub>> grpc_stub;
 
     // Methods used to start threads
     void grpc_thread_method();

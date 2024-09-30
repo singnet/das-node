@@ -57,7 +57,7 @@ public:
      *
      * TODO: Implement a graceful shutdown of all components
      */
-    ~AtomSpaceNode();
+    virtual ~AtomSpaceNode();
 
     /**
      * Basic constructor.
