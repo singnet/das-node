@@ -43,16 +43,6 @@ public:
 };
 
 
-// Exposing protected methods
-
-class AtomSpaceNodePublicist : public AtomSpaceNode {
-public:
-  using AtomSpaceNode::message_factory;
-};
-
-
-
-
 NB_MODULE(hyperon_das_node_ext, m) {
 
   // Message.h bindings
@@ -117,7 +107,7 @@ NB_MODULE(hyperon_das_node_ext, m) {
     .def("cast_leadership_vote", &AtomSpaceNode::cast_leadership_vote)
     .def(
       "message_factory",
-      &AtomSpaceNodePublicist::message_factory,
+      &AtomSpaceNode::message_factory,
       "command"_a,
       "args"_a)
     ;
