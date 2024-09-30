@@ -24,6 +24,7 @@ AtomSpaceNode::~AtomSpaceNode() {
 
 void AtomSpaceNode::join_network() {
     this->message_broker->join_network();
+    Utils::sleep(1000);
     this->leadership_broker->set_message_broker(this->message_broker);
     string my_leadership_vote = this->cast_leadership_vote();
     this->leadership_broker->start_leader_election(my_leadership_vote);
@@ -33,7 +34,6 @@ void AtomSpaceNode::join_network() {
     vector<string> args;
     args.push_back(this->node_id());
     this->message_broker->broadcast(this->known_commands.NODE_JOINED_NETWORK, args);
-    Utils::sleep(1000);
 }
 
 bool AtomSpaceNode::is_leader() {

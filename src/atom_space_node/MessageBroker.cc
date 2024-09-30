@@ -17,7 +17,7 @@
 using namespace atom_space_node;
 
 unsigned int SynchronousGRPC::MESSAGE_THREAD_COUNT = 10;
-unsigned int SynchronousSharedRAM::MESSAGE_THREAD_COUNT = 10;
+unsigned int SynchronousSharedRAM::MESSAGE_THREAD_COUNT = 1;
 unordered_map<string, RequestQueue *> SynchronousSharedRAM::NODE_QUEUE;
 mutex SynchronousSharedRAM::NODE_QUEUE_MUTEX;
 
@@ -46,6 +46,7 @@ MessageBroker *MessageBroker::factory(
 MessageBroker::MessageBroker(MessageFactory *host_node, const string &node_id) {
     this->host_node = host_node;
     this->node_id = node_id;
+    this->shutdown_flag = false;
 }
 
 MessageBroker::~MessageBroker() {
@@ -57,6 +58,18 @@ SynchronousSharedRAM::SynchronousSharedRAM(
 }
 
 SynchronousSharedRAM::~SynchronousSharedRAM() {
+    graceful_shutdown();
+    for (auto thread: inbox_threads) {
+        thread->join();
+    }
+    NODE_QUEUE_MUTEX.lock();
+    if (NODE_QUEUE.find(this->node_id) == NODE_QUEUE.end()) {
+        NODE_QUEUE_MUTEX.unlock();
+        Utils::error("Unable to remove node from network: " + this->node_id);
+    } else {
+        NODE_QUEUE.erase(this->node_id);
+        NODE_QUEUE_MUTEX.unlock();
+    }
 }
 
 SynchronousGRPC::SynchronousGRPC(
@@ -65,6 +78,14 @@ SynchronousGRPC::SynchronousGRPC(
 }
 
 SynchronousGRPC::~SynchronousGRPC() {
+    graceful_shutdown();
+    for (auto thread: inbox_threads) {
+        thread->join();
+    }
+    for (auto thread: outbox_threads) {
+        thread->join();
+    }
+    (*grpc_server)->Shutdown();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -79,10 +100,12 @@ void SynchronousGRPC::grpc_thread_method() {
     builder.RegisterService(this);
     std::cout << "SynchronousGRPC listening on " << server_address << std::endl;
     std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-    server->Wait();
+    grpc_server = &server;
+    (*grpc_server)->Wait();
 }
 
 void SynchronousSharedRAM::inbox_thread_method() {
+    bool stop_flag = false;
     do {
         void *request = this->incoming_messages.dequeue();
         if (request != NULL) {
@@ -117,35 +140,48 @@ void SynchronousSharedRAM::inbox_thread_method() {
             //delete message;
             delete message_data;
         } else {
-            Utils::sleep();
+            if (this->is_shutting_down()) {
+                stop_flag = true;
+            } else {
+                Utils::sleep();
+            }
         }
-    } while (true);
+    } while (! stop_flag);
 }
 
 void SynchronousGRPC::inbox_thread_method() {
+    bool stop_flag = false;
     do {
         void *request = this->incoming_messages.dequeue();
         if (request != NULL) {
             dasproto::MessageData *message_data = (dasproto::MessageData *) request;
             if (message_data->is_broadcast()) {
-                unordered_set<string> visited;
-                int num_visited = message_data->visited_recipients_size();
-                for (int i = 0; i < num_visited; i++) {
-                    visited.insert(message_data->visited_recipients(i));
-                }
-                if (visited.find(this->node_id) != visited.end()) {
-                    continue;
-                }
-                message_data->add_visited_recipients(this->node_id);
-                dasproto::Empty reply;
-                grpc::ClientContext context;
                 this->peers_mutex.lock();
-                for (auto target: this->peers) {
-                    if (visited.find(target) == visited.end()) {
-                        this->grpc_stub[target]->execute_message(&context, *message_data, &reply);
-                    }
-                }
+                unsigned int num_peers = this->peers.size();
                 this->peers_mutex.unlock();
+                if (num_peers > 0) {
+                    dasproto::Empty reply[num_peers];
+                    grpc::ClientContext context[num_peers];
+                    unsigned int cursor = 0;
+                    unordered_set<string> visited;
+                    int num_visited = message_data->visited_recipients_size();
+                    for (int i = 0; i < num_visited; i++) {
+                        visited.insert(message_data->visited_recipients(i));
+                    }
+                    if (visited.find(this->node_id) != visited.end()) {
+                        continue;
+                    }
+                    message_data->add_visited_recipients(this->node_id);
+                    this->peers_mutex.lock();
+                    for (auto target: this->peers) {
+                        if (visited.find(target) == visited.end()) {
+                            auto stub = dasproto::AtomSpaceNode::NewStub(grpc::CreateChannel(target, grpc::InsecureChannelCredentials()));
+                            stub->execute_message(&(context[cursor]), *message_data, &(reply[cursor]));
+                            cursor++;
+                        }
+                    }
+                    this->peers_mutex.unlock();
+                }
             }
             string command = message_data->command();
             vector<string> args;
@@ -164,16 +200,25 @@ void SynchronousGRPC::inbox_thread_method() {
             // TODO: fix memory leak
             // delete message;
         } else {
-            Utils::sleep();
+            if (this->is_shutting_down()) {
+                stop_flag = true;
+            } else {
+                Utils::sleep();
+            }
         }
-    } while (true);
+    } while (! stop_flag);
 }
 
 void SynchronousGRPC::outbox_thread_method() {
+    bool stop_flag = false;
     // TODO Implement this method
     do {
-        Utils::sleep();
-    } while (true);
+        if (this->is_shutting_down()) {
+            stop_flag = true;
+        } else {
+            Utils::sleep();
+        }
+    } while (! stop_flag);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -195,14 +240,28 @@ bool MessageBroker::is_peer(const string &peer_id) {
     return answer;
 }
 
+void MessageBroker::graceful_shutdown() {
+    this->shutdown_flag_mutex.lock();
+    this->shutdown_flag = true;
+    this->shutdown_flag_mutex.unlock();
+}
+
+bool MessageBroker::is_shutting_down() {
+    bool answer;
+    this->shutdown_flag_mutex.lock();
+    answer = this->shutdown_flag;
+    this->shutdown_flag_mutex.unlock();
+    return answer;
+}
+
 // ----------------------------------------------------------------
 // SynchronousSharedRAM
 
 void SynchronousSharedRAM::join_network() {
     NODE_QUEUE_MUTEX.lock();
-    if (NODE_QUEUE.find(node_id) != NODE_QUEUE.end()) {
+    if (NODE_QUEUE.find(this->node_id) != NODE_QUEUE.end()) {
         NODE_QUEUE_MUTEX.unlock();
-        Utils::error("Node ID already in the network: " + node_id);
+        Utils::error("Node ID already in the network: " + this->node_id);
     } else {
         NODE_QUEUE[this->node_id] = &(this->incoming_messages);
         NODE_QUEUE_MUTEX.unlock();
@@ -219,28 +278,32 @@ void SynchronousSharedRAM::send(
     const vector<string> &args,
     const string &recipient) {
 
-    if (! is_peer(recipient)) {
-        Utils::error("Unknown peer: " + recipient);
+    if (! this->is_shutting_down()) {
+        if (! is_peer(recipient)) {
+            Utils::error("Unknown peer: " + recipient);
+        }
+        CommandLinePackage *command_line = new CommandLinePackage(command, args);
+        NODE_QUEUE[recipient]->enqueue((void *) command_line);
     }
-    CommandLinePackage *command_line = new CommandLinePackage(command, args);
-    NODE_QUEUE[recipient]->enqueue((void *) command_line);
 }
 
 void SynchronousSharedRAM::broadcast(const string &command, const vector<string> &args) {
-    this->peers_mutex.lock();
-    unsigned int num_peers = this->peers.size();
-    if (num_peers == 0) {
+    if (! this->is_shutting_down()) {
+        this->peers_mutex.lock();
+        unsigned int num_peers = this->peers.size();
+        if (num_peers == 0) {
+            this->peers_mutex.unlock();
+            return;
+        }
+        CommandLinePackage *command_line;
+        for (auto peer_id: this->peers) {
+            command_line = new CommandLinePackage(command, args);
+            command_line->is_broadcast = true;
+            command_line->visited.insert(this->node_id);
+            NODE_QUEUE[peer_id]->enqueue((void *) command_line);
+        }
         this->peers_mutex.unlock();
-        return;
     }
-    CommandLinePackage *command_line;
-    for (auto peer_id: this->peers) {
-        command_line = new CommandLinePackage(command, args);
-        command_line->is_broadcast = true;
-        command_line->visited.insert(this->node_id);
-        NODE_QUEUE[peer_id]->enqueue((void *) command_line);
-    }
-    this->peers_mutex.unlock();
 }
 
 // ----------------------------------------------------------------
@@ -260,8 +323,6 @@ void SynchronousGRPC::join_network() {
 
 void SynchronousGRPC::add_peer(const string &peer_id) {
     MessageBroker::add_peer(peer_id);
-    auto channel = grpc::CreateChannel(peer_id, grpc::InsecureChannelCredentials());
-    this->grpc_stub[peer_id] = dasproto::AtomSpaceNode::NewStub(channel);
 }
 
 void SynchronousGRPC::send(
@@ -269,8 +330,6 @@ void SynchronousGRPC::send(
     const vector<string> &args,
     const string &recipient) {
 
-    dasproto::Empty reply;
-    grpc::ClientContext context;
     if (! is_peer(recipient)) {
         Utils::error("Unknown peer: " + recipient);
     }
@@ -281,9 +340,11 @@ void SynchronousGRPC::send(
     }
     message_data.set_sender(this->node_id);
     message_data.set_is_broadcast(false);
-    this->grpc_stub[recipient]->execute_message(&context, message_data, &reply);
+    dasproto::Empty reply;
+    grpc::ClientContext context;
+    auto stub = dasproto::AtomSpaceNode::NewStub(grpc::CreateChannel(recipient, grpc::InsecureChannelCredentials()));
+    stub->execute_message(&context, message_data, &reply);
 }
-
 
 void SynchronousGRPC::broadcast(const string &command, const vector<string> &args) {
     this->peers_mutex.lock();
@@ -304,7 +365,8 @@ void SynchronousGRPC::broadcast(const string &command, const vector<string> &arg
         message_data.set_sender(this->node_id);
         message_data.set_is_broadcast(true);
         message_data.add_visited_recipients(this->node_id);
-        this->grpc_stub[peer_id]->execute_message(&(context[cursor]), message_data, &(reply[cursor]));
+        auto stub = dasproto::AtomSpaceNode::NewStub(grpc::CreateChannel(peer_id, grpc::InsecureChannelCredentials()));
+        stub->execute_message(&(context[cursor]), message_data, &(reply[cursor]));
         cursor++;
     }
     this->peers_mutex.unlock();
@@ -319,7 +381,11 @@ grpc::Status SynchronousGRPC::ping(
     dasproto::Ack* reply) {
 
     reply->set_msg("PING");
-    return grpc::Status::OK;
+    if (! this->is_shutting_down()) {
+        return grpc::Status::OK;
+    } else {
+        return grpc::Status::CANCELLED;
+    }
 }
 
 grpc::Status SynchronousGRPC::execute_message(
@@ -327,9 +393,13 @@ grpc::Status SynchronousGRPC::execute_message(
     const dasproto::MessageData* request,
     dasproto::Empty* reply) {
 
-    // TODO: fix memory leak
-    this->incoming_messages.enqueue((void *) new dasproto::MessageData(*request));
-    return grpc::Status::OK;
+    if (! this->is_shutting_down()) {
+        // TODO: fix memory leak
+        this->incoming_messages.enqueue((void *) new dasproto::MessageData(*request));
+        return grpc::Status::OK;
+    } else {
+        return grpc::Status::CANCELLED;
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
