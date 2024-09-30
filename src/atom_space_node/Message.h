@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 using namespace std;
 
@@ -68,7 +69,7 @@ public:
      * @param args Arguments for the command.
      * @return An object of the proper class to deal with the passed command.
      */
-    virtual Message *message_factory(string &command, vector<string> &args) = 0;
+    virtual std::unique_ptr<Message> message_factory(string &command, vector<string> &args) = 0;
 };
 
 // -------------------------------------------------------------------------------------------------

@@ -36,7 +36,7 @@ public:
      * @param args Arguments for the command.
      * @return A Message object
      */
-    virtual Message *message_factory(string &command, vector<string> &args);
+    virtual std::unique_ptr<Message> message_factory(string &command, vector<string> &args);
 
 
     // Delegated to concrete subclasses
