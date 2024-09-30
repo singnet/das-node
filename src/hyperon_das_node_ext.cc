@@ -77,7 +77,8 @@ NB_MODULE(hyperon_das_node_ext, m) {
 
   // MessageBroker.h bindings
   nb::enum_<MessageBrokerType>(m, "MessageBrokerType")
-    .value("GRPC", MessageBrokerType::GRPC);
+    .value("GRPC", MessageBrokerType::GRPC)
+    .value("RAM", MessageBrokerType::RAM);
   nb::class_<MessageBroker>(m, "MessageBroker")
     .def_static("factory", &MessageBroker::factory)
     .def("add_peer", &MessageBroker::add_peer)

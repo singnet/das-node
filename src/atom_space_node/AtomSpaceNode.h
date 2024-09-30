@@ -59,9 +59,6 @@ public:
      */
     ~AtomSpaceNode();
 
-    // --------------------------------------------------------------------------------------------
-    // Public API
-
     /**
      * Basic constructor.
      *
@@ -75,6 +72,9 @@ public:
         LeadershipBrokerType leadership_algorithm,
         MessageBrokerType messaging_backend
     );
+
+    // --------------------------------------------------------------------------------------------
+    // Public API
 
     /**
      * Joins a network of similar nodes.
@@ -112,7 +112,6 @@ public:
      */
     void add_peer(const string &peer_id);
 
-
     /**
      * Returns this node's ID.
      *
@@ -142,6 +141,15 @@ public:
      */
     void send(const string &command, const vector<string> &args, const string &recipient);
 
+    /**
+     * Build the Message object which is supposed to execute the passed command.
+     *
+     * @param command The command to be remotely executed.
+     * @param args Arguments for the command.
+     * @return A Message object
+     */
+    virtual Message *message_factory(string &command, vector<string> &args);
+
     // --------------------------------------------------------------------------------------------
     // API to be extended by concrete subclasses
 
@@ -162,20 +170,6 @@ public:
      * @return This node's vote (which is the ID of the node being voted) for leader.
      */
     virtual string cast_leadership_vote() = 0;
-
-protected:
-
-    // --------------------------------------------------------------------------------------------
-    // Protected API
-
-    /**
-     * Build the Message object which is supposed to execute the passed command.
-     *
-     * @param command The command to be remotely executed.
-     * @param args Arguments for the command.
-     * @return A Message object
-     */
-    virtual Message *message_factory(string &command, vector<string> &args);
 
 private:
 
