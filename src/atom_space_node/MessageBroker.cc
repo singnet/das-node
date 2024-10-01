@@ -131,12 +131,12 @@ void SynchronousSharedRAM::inbox_thread_method() {
                 }
                 this->peers_mutex.unlock();
             }
+            if (this->host_node == NULL) {
+                Utils::error("Invalid NULL host_node");
+            }
             std::shared_ptr<Message> message = this->host_node->message_factory(message_data->command, message_data->args);
             if (! message) {
                 Utils::error("Invalid NULL Message");
-            }
-            if (this->host_node == NULL) {
-                Utils::error("Invalid NULL host_node");
             }
             message->act(this->host_node);
             delete message_data;
