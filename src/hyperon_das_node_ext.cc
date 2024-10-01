@@ -54,7 +54,8 @@ public:
 NB_MODULE(hyperon_das_node_ext, m) {
 
   // Message.h bindings
-  nb::class_<Message>(m, "Message")
+  nb::class_<Message, MessageTrampoline>(m, "Message")
+    .def(nb::init<>())
     .def("act", &Message::act);
 
   nb::class_<MessageFactory, MessageFactoryTrampoline>(m, "MessageFactory")
