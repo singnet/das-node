@@ -53,6 +53,6 @@ string CacheNodeClient::cast_leadership_vote() {
 // -------------------------------------------------------------------------------------------------
 // Other methods
 
-std::unique_ptr<Message> CacheNode::message_factory(string &command, vector<string> &args) {
+std::shared_ptr<Message> CacheNode::message_factory(string &command, vector<string> &args) {
     return AtomSpaceNode::message_factory(command, args);
 }

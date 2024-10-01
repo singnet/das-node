@@ -10,6 +10,25 @@ using namespace std;
 namespace atom_space_node {
 
 class AtomSpaceNode;
+class Message;
+
+/**
+ * Interface to be implemented by nodes (concrete implementations of AtomSpaceNode) in order to
+ * provide a factory method for the types of messages defined in its specific network.
+ */
+class MessageFactory {
+
+public:
+
+    /**
+     * Message factory method.
+     *
+     * @param command The command to be executed in the target nodes.
+     * @param args Arguments for the command.
+     * @return An object of the proper class to deal with the passed command.
+     */
+    virtual shared_ptr<Message> message_factory(string &command, vector<string> &args) = 0;
+};
 
 // -------------------------------------------------------------------------------------------------
 // Abstract superclass
@@ -38,7 +57,7 @@ public:
      *
      * @param node The AtomSpaceNode which received the Message.
      */
-    virtual void act(AtomSpaceNode *node) = 0;
+    virtual void act(shared_ptr<MessageFactory> node) = 0;
 
     /**
      * Empty constructor.
@@ -52,24 +71,6 @@ public:
 
 private:
 
-};
-
-/**
- * Interface to be implemented by nodes (concrete implementations of AtomSpaceNode) in order to
- * provide a factory method for the types of messages defined in its specific network.
- */
-class MessageFactory {
-
-public:
-
-    /**
-     * Message factory method.
-     *
-     * @param command The command to be executed in the target nodes.
-     * @param args Arguments for the command.
-     * @return An object of the proper class to deal with the passed command.
-     */
-    virtual std::unique_ptr<Message> message_factory(string &command, vector<string> &args) = 0;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -103,7 +104,7 @@ public:
     /**
      * Calls node->node_joined_neytwork() in the recipient node.
      */
-    void act(AtomSpaceNode *node);
+    void act(shared_ptr<MessageFactory> node);
 };
 
 } // namespace atom_space_node

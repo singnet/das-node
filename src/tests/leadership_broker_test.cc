@@ -16,7 +16,7 @@ TEST(LeadershipBroker, basics) {
         FAIL() << "Expected std::runtime_error";
     }
 
-    SingleMasterServer *leadership_broker = (SingleMasterServer *)
+    shared_ptr<LeadershipBroker> leadership_broker =
         LeadershipBroker::factory(LeadershipBrokerType::SINGLE_MASTER_SERVER);
 
     EXPECT_EQ(leadership_broker->leader_id(), "");

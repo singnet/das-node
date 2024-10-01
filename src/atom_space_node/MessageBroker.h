@@ -44,9 +44,9 @@ public:
      * @param node_id The ID of the AtomSpaceNode this MessageBroker belongs to.
      * @return An instance of the selected MessageBroker subclass.
      */
-    static MessageBroker *factory(
+    static shared_ptr<MessageBroker> factory(
             MessageBrokerType instance_type, 
-            MessageFactory *host_node, 
+            shared_ptr<MessageFactory> host_node, 
             const string &node_id);
 
     /**
@@ -56,7 +56,7 @@ public:
      * node this MessageBroker belongs to.
      * @param node_id The ID of the AtomSpaceNode this MessageBroker belongs to.
      */
-    MessageBroker(MessageFactory *host_node, const string &node_id);
+    MessageBroker(shared_ptr<MessageFactory> host_node, const string &node_id);
 
     /**
      * Destructor.
@@ -127,12 +127,13 @@ public:
         const vector<string> &args, 
         const string &recipient) = 0;
 
-    MessageFactory *host_node;
+    shared_ptr<MessageFactory> host_node;
     unordered_set<string> peers;
     mutex peers_mutex;
     string node_id;
     bool shutdown_flag;
     mutex shutdown_flag_mutex;
+    bool joined_network;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -154,7 +155,7 @@ public:
      * @param host_node The object responsible for building Message objects. Typically, it's The
      * node this MessageBroker belongs to.
      */
-    SynchronousSharedRAM(MessageFactory *host_node, const string &node_id);
+    SynchronousSharedRAM(shared_ptr<MessageFactory> host_node, const string &node_id);
 
     /**
      * Destructor.
@@ -257,7 +258,7 @@ public:
      * node this MessageBroker belongs to.
      * @param node_id The ID of the AtomSpaceNode this MessageBroker belongs to.
      */
-    SynchronousGRPC(MessageFactory *host_node, const string &node_id);
+    SynchronousGRPC(shared_ptr<MessageFactory> host_node, const string &node_id);
 
     /**
      * Destructor.
@@ -334,17 +335,24 @@ public:
 private:
 
     static unsigned int MESSAGE_THREAD_COUNT;
-    std::unique_ptr<grpc::Server> grpc_server;
+    unique_ptr<grpc::Server> grpc_server;
     thread *grpc_thread;
     vector<thread *> inbox_threads;
-    vector<thread *> outbox_threads;
     RequestQueue incoming_messages; // Thread safe container
     RequestQueue outgoing_messages; // Thread safe container
+
+    bool grpc_server_started_flag;
+    mutex grpc_server_started_flag_mutex;
+    bool inbox_setup_finished_flag;
+    mutex inbox_setup_finished_flag_mutex;
+    void set_grpc_server_started();
+    bool grpc_server_started();
+    void set_inbox_setup_finished();
+    bool inbox_setup_finished();
 
     // Methods used to start threads
     void grpc_thread_method();
     void inbox_thread_method();
-    void outbox_thread_method();
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -359,7 +367,6 @@ class CommandLinePackage {
         bool is_broadcast;
         unordered_set<string> visited;
 };
-
 
 } // namespace atom_space_node
 

@@ -11,21 +11,23 @@ AtomSpaceNode::AtomSpaceNode(
 
     this->my_node_id = node_id;
     this->leadership_broker = LeadershipBroker::factory(leadership_algorithm);
-    this->message_broker = MessageBroker::factory(messaging_backend, this, node_id);
+    this->message_broker = MessageBroker::factory(
+        messaging_backend, 
+        // Empty destructor to avoid node deletion
+        shared_ptr<MessageFactory>(this, [](MessageFactory *) {}),
+        node_id);
 }
 
 AtomSpaceNode::~AtomSpaceNode() {
-    delete this->leadership_broker;
-    delete this->message_broker;
 }
 
 // -------------------------------------------------------------------------------------------------
 // Public API
 
 void AtomSpaceNode::join_network() {
-    this->message_broker->join_network();
-    Utils::sleep(1000);
     this->leadership_broker->set_message_broker(this->message_broker);
+    this->message_broker->join_network();
+    //Utils::sleep(1000);
     string my_leadership_vote = this->cast_leadership_vote();
     this->leadership_broker->start_leader_election(my_leadership_vote);
     while (! this->has_leader()) {
@@ -68,10 +70,10 @@ void AtomSpaceNode::send(
     this->message_broker->send(command, args, recipient);
 }
 
-std::unique_ptr<Message> AtomSpaceNode::message_factory(string &command, vector<string> &args) {
+std::shared_ptr<Message> AtomSpaceNode::message_factory(string &command, vector<string> &args) {
     if (command == this->known_commands.NODE_JOINED_NETWORK) {
-        return std::unique_ptr<Message>(new NodeJoinedNetwork(args[0]));
+        return std::shared_ptr<Message>(new NodeJoinedNetwork(args[0]));
     } else {
-        return std::unique_ptr<Message>{};
+        return std::shared_ptr<Message>{};
     }
 }

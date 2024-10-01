@@ -18,17 +18,19 @@ public:
         this->command = command;
         this->args = args;
     }
-    void act(AtomSpaceNode *_node);
+    void act(shared_ptr<MessageFactory> node);
 };
 
 class TestNode : public AtomSpaceNode {
+
 public:
-    virtual ~TestNode() {}
+
     string server_id;
     bool is_server;
     string command;
     vector<string> args;
     unsigned int node_joined_network_count;
+
     TestNode(
         const string &node_id,
         const string &server_id,
@@ -47,6 +49,9 @@ public:
         this->node_joined_network_count = 0;
     }
 
+    virtual ~TestNode() {
+    }
+
     string cast_leadership_vote() {
         if (this->is_server) {
             return this->node_id();
@@ -62,22 +67,22 @@ public:
         }
     }
 
-    std::unique_ptr<Message> message_factory(string &command, vector<string> &args) {
-        std::unique_ptr<Message> message = AtomSpaceNode::message_factory(command, args);
+    std::shared_ptr<Message> message_factory(string &command, vector<string> &args) {
+        std::shared_ptr<Message> message = AtomSpaceNode::message_factory(command, args);
         if (message) {
             return message;
         }
         if (command == "c1" || command == "c2" || command == "c3") {
-            return std::unique_ptr<Message>(new TestMessage(command, args));
+            return std::shared_ptr<Message>(new TestMessage(command, args));
         }
-        return std::unique_ptr<Message>{};
+        return std::shared_ptr<Message>{};
     }
 };
 
-void TestMessage::act(AtomSpaceNode *_node) {
-    TestNode *node = (TestNode *) _node;
-    ((TestNode *) node)->command = this->command;
-    ((TestNode *) node)->args = this->args;
+void TestMessage::act(shared_ptr<MessageFactory> node) {
+    auto atom_space_node = dynamic_pointer_cast<TestNode>(node);
+    atom_space_node->command = this->command;
+    atom_space_node->args = this->args;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -159,14 +164,7 @@ TEST(AtomSpaceNode, communication) {
     TestNode *client1;
     TestNode *client2;
 
-    unsigned int num_repetitions = 20;
-    MessageBrokerType messaging_type;
-    for (unsigned int i = 0; i < num_repetitions; i++) {
-        if (Utils::flip_coin()) {
-            messaging_type = MessageBrokerType::RAM;
-        } else {
-            messaging_type = MessageBrokerType::GRPC;
-        }
+    for (auto messaging_type: {MessageBrokerType::RAM , MessageBrokerType::GRPC}) {
 
         server = new TestNode(
             server_id,
@@ -227,5 +225,6 @@ TEST(AtomSpaceNode, communication) {
         delete server;
         delete client1;
         delete client2;
+        Utils::sleep(1000);
     }
 }

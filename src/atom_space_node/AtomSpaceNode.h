@@ -148,7 +148,7 @@ public:
      * @param args Arguments for the command.
      * @return A Message object
      */
-    virtual std::unique_ptr<Message> message_factory(string &command, vector<string> &args);
+    virtual shared_ptr<Message> message_factory(string &command, vector<string> &args);
 
     // --------------------------------------------------------------------------------------------
     // API to be extended by concrete subclasses
@@ -178,8 +178,8 @@ private:
     } known_commands;
 
     string my_node_id;
-    LeadershipBroker *leadership_broker;
-    MessageBroker *message_broker;
+    shared_ptr<LeadershipBroker> leadership_broker;
+    shared_ptr<MessageBroker> message_broker;
 };
 
 } // namespace atom_space_node
