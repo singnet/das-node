@@ -2,9 +2,11 @@ from hyperon_das_node import AtomSpaceNode, Message, LeadershipBrokerType, Messa
 
 class PrintMessage(Message):
     def __init__(self, content: str):
+        super().__init__()
         self.content = content
 
     def act(node: "CacheNode") -> None:
+        print("PrintMessage.act")
         # ideally we should call a node.method in here 
         node.print_content(self.content)
 
@@ -22,15 +24,19 @@ class CacheNode(AtomSpaceNode):
         }
 
     def print_content(self, content: str):
+        print("CacheNode: print_content")
         print(content)
 
-    def message_fatctory(self, command: str, args: list[str]) -> Message:
-        breakpoint()
+    def message_factory(self, command: str, args: list[str]) -> Message:
+        print("CacheNode: message_factory")
         message = super().message_factory(command, args)
         if message is not None:
+            print(f"CacheNode.super returned {message=}")
             return message
-        if klass := self.known_commands.get(command):
-            return klass(*args)
+
+        message = PrintMessage(content=args[0])
+        print(f"Derived Message instance: {message=}")
+        return message
 
         return None
 
