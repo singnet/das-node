@@ -191,12 +191,12 @@ void SynchronousGRPC::inbox_thread_method() {
             for (int i = 0; i < num_args; i++) {
                 args.push_back(message_data->args(i));
             }
+            if (this->host_node == NULL) {
+                Utils::error("Invalid NULL host_node");
+            }
             std::shared_ptr<Message> message = this->host_node->message_factory(command, args);
             if (! message) {
                 Utils::error("Invalid NULL Message");
-            }
-            if (this->host_node == NULL) {
-                Utils::error("Invalid NULL host_node");
             }
             message->act(this->host_node);
         } else {
