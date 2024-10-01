@@ -24,68 +24,72 @@ mutex SynchronousSharedRAM::NODE_QUEUE_MUTEX;
 // -------------------------------------------------------------------------------------------------
 // Constructors and destructors
 
-MessageBroker *MessageBroker::factory(
+shared_ptr<MessageBroker> MessageBroker::factory(
     MessageBrokerType instance_type,
-    MessageFactory *host_node,
+    shared_ptr<MessageFactory> host_node,
     const string &node_id) {
 
     switch (instance_type) {
         case MessageBrokerType::RAM : {
-            return new SynchronousSharedRAM(host_node, node_id);
+            return shared_ptr<MessageBroker>(new SynchronousSharedRAM(host_node, node_id));
         }
         case MessageBrokerType::GRPC : {
-            return new SynchronousGRPC(host_node, node_id);
+            return shared_ptr<MessageBroker>(new SynchronousGRPC(host_node, node_id));
         }
         default: {
             Utils::error("Invalid MessageBrokerType: " + to_string((int) instance_type));
-            return NULL; // to avoid warnings
+            return shared_ptr<MessageBroker>{}; // to avoid warnings
         }
     }
 }
 
-MessageBroker::MessageBroker(MessageFactory *host_node, const string &node_id) {
+MessageBroker::MessageBroker(shared_ptr<MessageFactory> host_node, const string &node_id) {
     this->host_node = host_node;
     this->node_id = node_id;
     this->shutdown_flag = false;
+    this->joined_network = false;
 }
 
 MessageBroker::~MessageBroker() {
 }
 
 SynchronousSharedRAM::SynchronousSharedRAM(
-    MessageFactory *host_node,
+    shared_ptr<MessageFactory> host_node,
     const string &node_id) : MessageBroker(host_node, node_id) {
 }
 
 SynchronousSharedRAM::~SynchronousSharedRAM() {
-    graceful_shutdown();
-    for (auto thread: inbox_threads) {
-        thread->join();
-    }
-    NODE_QUEUE_MUTEX.lock();
-    if (NODE_QUEUE.find(this->node_id) == NODE_QUEUE.end()) {
-        NODE_QUEUE_MUTEX.unlock();
-        Utils::error("Unable to remove node from network: " + this->node_id);
-    } else {
-        NODE_QUEUE.erase(this->node_id);
-        NODE_QUEUE_MUTEX.unlock();
+    if (this->joined_network) {
+        graceful_shutdown();
+        for (auto thread: inbox_threads) {
+            thread->join();
+        }
+        NODE_QUEUE_MUTEX.lock();
+        if (NODE_QUEUE.find(this->node_id) == NODE_QUEUE.end()) {
+            NODE_QUEUE_MUTEX.unlock();
+            Utils::error("Unable to remove node from network: " + this->node_id);
+        } else {
+            NODE_QUEUE.erase(this->node_id);
+            NODE_QUEUE_MUTEX.unlock();
+        }
     }
 }
 
 SynchronousGRPC::SynchronousGRPC(
-    MessageFactory *host_node,
+    shared_ptr<MessageFactory> host_node,
     const string &node_id) : MessageBroker(host_node, node_id) {
+    this->grpc_server_started_flag = false;
+    this->inbox_setup_finished_flag = false;
 }
 
 SynchronousGRPC::~SynchronousGRPC() {
-    graceful_shutdown();
-    for (auto thread: inbox_threads) {
-        thread->join();
+    if (this->joined_network) {
+        graceful_shutdown();
+        for (auto thread: inbox_threads) {
+            thread->join();
+        }
+        grpc_server->Shutdown();
     }
-    for (auto thread: outbox_threads) {
-        thread->join();
-    }
-    grpc_server->Shutdown();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -101,6 +105,7 @@ void SynchronousGRPC::grpc_thread_method() {
     std::cout << "SynchronousGRPC listening on " << server_address << std::endl;
     std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
     grpc_server = std::move(server);
+    set_grpc_server_started();
     grpc_server->Wait();
 }
 
@@ -128,14 +133,19 @@ void SynchronousSharedRAM::inbox_thread_method() {
                 }
                 this->peers_mutex.unlock();
             }
-            std::unique_ptr<Message> message = this->host_node->message_factory(message_data->command, message_data->args);
+            std::shared_ptr<Message> message = this->host_node->message_factory(message_data->command, message_data->args);
             if (! message) {
                 Utils::error("Invalid NULL Message");
             }
             if (this->host_node == NULL) {
                 Utils::error("Invalid NULL host_node");
             }
-            message->act((AtomSpaceNode *) this->host_node);
+            // this->host_node is an AtomSpaceNode. However, inside this class it's known as a MessageFactory.
+            // The issue here is because we can't import AtomSpaceNode (because of cyclic dependency) so
+            // in this scope AtomSpaceNode is declared simply as "class AtomSpaceNode" (incomplete type).
+            // So we need to get the raw pointer out of the shared_ptr and cast it to AtomSpaceNode before
+            // using it to build the NodeWrapper.
+            message->act(shared_ptr<NodeWrapper>(new NodeWrapper((AtomSpaceNode *) (&(*(this->host_node))))));
             delete message_data;
         } else {
             if (this->is_shutting_down()) {
@@ -149,6 +159,7 @@ void SynchronousSharedRAM::inbox_thread_method() {
 
 void SynchronousGRPC::inbox_thread_method() {
     bool stop_flag = false;
+    set_inbox_setup_finished();
     do {
         void *request = this->incoming_messages.dequeue();
         if (request != NULL) {
@@ -187,32 +198,21 @@ void SynchronousGRPC::inbox_thread_method() {
             for (int i = 0; i < num_args; i++) {
                 args.push_back(message_data->args(i));
             }
-            std::unique_ptr<Message> message = this->host_node->message_factory(command, args);
+            std::shared_ptr<Message> message = this->host_node->message_factory(command, args);
             if (! message) {
                 Utils::error("Invalid NULL Message");
             }
             if (this->host_node == NULL) {
                 Utils::error("Invalid NULL host_node");
             }
-            message->act((AtomSpaceNode *) this->host_node);
+            // See comment in similar call above
+            message->act(shared_ptr<NodeWrapper>(new NodeWrapper((AtomSpaceNode *) (&(*(this->host_node))))));
         } else {
             if (this->is_shutting_down()) {
                 stop_flag = true;
             } else {
                 Utils::sleep();
             }
-        }
-    } while (! stop_flag);
-}
-
-void SynchronousGRPC::outbox_thread_method() {
-    bool stop_flag = false;
-    // TODO Implement this method
-    do {
-        if (this->is_shutting_down()) {
-            stop_flag = true;
-        } else {
-            Utils::sleep();
         }
     } while (! stop_flag);
 }
@@ -267,6 +267,7 @@ void SynchronousSharedRAM::join_network() {
             &SynchronousSharedRAM::inbox_thread_method,
             this));
     }
+    this->joined_network = true;
 }
 
 void SynchronousSharedRAM::send(
@@ -306,14 +307,19 @@ void SynchronousSharedRAM::broadcast(const string &command, const vector<string>
 // SynchronousGRPC
 
 void SynchronousGRPC::join_network() {
-    this->grpc_thread = new std::thread(&SynchronousGRPC::grpc_thread_method, this);
+    this->grpc_thread = new std::thread(
+        &SynchronousGRPC::grpc_thread_method, 
+        this);
+    while (! this->grpc_server_started()) {
+        Utils::sleep();
+    }
     for (unsigned int i = 0; i < MESSAGE_THREAD_COUNT; i++) {
         this->inbox_threads.push_back(new thread(
             &SynchronousGRPC::inbox_thread_method,
             this));
-        this->outbox_threads.push_back(new thread(
-            &SynchronousGRPC::outbox_thread_method,
-            this));
+    }
+    while (! this->inbox_setup_finished()) {
+        Utils::sleep();
     }
 }
 
@@ -366,6 +372,38 @@ void SynchronousGRPC::broadcast(const string &command, const vector<string> &arg
         cursor++;
     }
     this->peers_mutex.unlock();
+}
+
+void SynchronousGRPC::set_grpc_server_started() {
+    this->grpc_server_started_flag_mutex.lock();
+    this->grpc_server_started_flag = true;
+    this->grpc_server_started_flag_mutex.unlock();
+}
+
+bool SynchronousGRPC::grpc_server_started() {
+    bool answer = false;
+    this->grpc_server_started_flag_mutex.lock();
+    if (this->grpc_server_started_flag) {
+        answer = true;
+    }
+    this->grpc_server_started_flag_mutex.unlock();
+    return answer;
+}
+
+void SynchronousGRPC::set_inbox_setup_finished() {
+    this->inbox_setup_finished_flag_mutex.lock();
+    this->inbox_setup_finished_flag = true;
+    this->inbox_setup_finished_flag_mutex.unlock();
+}
+
+bool SynchronousGRPC::inbox_setup_finished() {
+    bool answer = false;
+    this->inbox_setup_finished_flag_mutex.lock();
+    if (this->inbox_setup_finished_flag) {
+        answer = true;
+    }
+    this->inbox_setup_finished_flag_mutex.unlock();
+    return answer;
 }
 
 // -------------------------------------------------------------------------------------------------

@@ -9,6 +9,10 @@ Message::Message() {
 Message::~Message() {
 }
 
+NodeWrapper::NodeWrapper(AtomSpaceNode *node) {
+    this->node = node;
+}
+
 // -------------------------------------------------------------------------------------------------
 // Specialized Message subclasses
 
@@ -19,6 +23,6 @@ NodeJoinedNetwork::NodeJoinedNetwork(string &node_id) {
     this->joining_node = node_id;
 }
 
-void NodeJoinedNetwork::act(AtomSpaceNode *node) {
-    node->node_joined_network(this->joining_node);
+void NodeJoinedNetwork::act(shared_ptr<NodeWrapper> node_wrapper) {
+    node_wrapper->node->node_joined_network(this->joining_node);
 }

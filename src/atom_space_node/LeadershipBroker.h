@@ -32,7 +32,7 @@ public:
      * LeadershipBroker.
      * @return An instance of the selected LeadershipBroker subclass.
      */
-    static LeadershipBroker *factory(LeadershipBrokerType instance_type);
+    static shared_ptr<LeadershipBroker> factory(LeadershipBrokerType instance_type);
 
     /**
      * Basic empty constructor
@@ -49,7 +49,7 @@ public:
      *
      * @param message_broker The MessageBroker to be used to ciommunicate with peers.
      */
-    void set_message_broker(MessageBroker *message_broker);
+    void set_message_broker(shared_ptr<MessageBroker> message_broker);
 
     /**
      * Returns the leader node ID.
@@ -83,9 +83,8 @@ public:
 
 private:
 
-    MessageBroker *message_broker;
+    shared_ptr<MessageBroker> message_broker;
     string network_leader_id;
-
 };
 
 // -------------------------------------------------------------------------------------------------

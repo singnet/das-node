@@ -13,14 +13,14 @@ LeadershipBroker::LeadershipBroker() {
 LeadershipBroker::~LeadershipBroker() {
 }
 
-LeadershipBroker *LeadershipBroker::factory(LeadershipBrokerType instance_type) {
+shared_ptr<LeadershipBroker> LeadershipBroker::factory(LeadershipBrokerType instance_type) {
     switch (instance_type) {
         case LeadershipBrokerType::SINGLE_MASTER_SERVER : {
-            return new SingleMasterServer();
+            return shared_ptr<LeadershipBroker>(new SingleMasterServer());
         }
         default: {
             Utils::error("Invalid LeadershipBrokerType: " + to_string((int) instance_type));
-            return NULL; // to avoid warnings
+            return shared_ptr<LeadershipBroker>{};
         }
     }
 }
@@ -46,7 +46,7 @@ bool LeadershipBroker::has_leader() {
     return (this->network_leader_id != "");
 }
 
-void LeadershipBroker::set_message_broker(MessageBroker *message_broker) {
+void LeadershipBroker::set_message_broker(shared_ptr<MessageBroker> message_broker) {
     this->message_broker = message_broker;
 }
   

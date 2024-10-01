@@ -11,6 +11,20 @@ namespace atom_space_node {
 
 class AtomSpaceNode;
 
+/**
+ * Wrapper of nodes passed to act().
+ *
+ * This class is required to ease the integration with nano bind (a layer to expose public
+ * API to Python callers.
+ *
+ * Nodes are wrapped into objects of this type in order to be passed to act().
+ */
+class NodeWrapper {
+    public:
+        NodeWrapper(AtomSpaceNode *node);
+        AtomSpaceNode *node;
+};
+
 // -------------------------------------------------------------------------------------------------
 // Abstract superclass
 
@@ -38,7 +52,7 @@ public:
      *
      * @param node The AtomSpaceNode which received the Message.
      */
-    virtual void act(AtomSpaceNode *node) = 0;
+    virtual void act(shared_ptr<NodeWrapper> node_wrapper) = 0;
 
     /**
      * Empty constructor.
@@ -69,7 +83,7 @@ public:
      * @param args Arguments for the command.
      * @return An object of the proper class to deal with the passed command.
      */
-    virtual std::unique_ptr<Message> message_factory(string &command, vector<string> &args) = 0;
+    virtual std::shared_ptr<Message> message_factory(string &command, vector<string> &args) = 0;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -103,7 +117,7 @@ public:
     /**
      * Calls node->node_joined_neytwork() in the recipient node.
      */
-    void act(AtomSpaceNode *node);
+    void act(shared_ptr<NodeWrapper> node_wrapper);
 };
 
 } // namespace atom_space_node

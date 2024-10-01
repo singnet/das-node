@@ -12,11 +12,13 @@
 ### Inside the container build the cpp code
 ```sh
 # This will build the cpp code and copy files of interest to bazel_assets dir
-./scripts/bazel_build.sh
+cd src
+../scripts/bazel_build.sh
 ```
 
 ### Build and install the python package
 ```sh
+cd ..
 pip install .
 # If you want to build the wheel
 pip wheel .
