@@ -57,10 +57,6 @@ NB_MODULE(hyperon_das_node_ext, m) {
   nb::class_<Message>(m, "Message")
     .def("act", &Message::act);
 
-  nb::class_<NodeJoinedNetwork>(m, "NodeJoinedNetwork")
-    .def(nb::init<string &>())
-    .def("act", &NodeJoinedNetwork::act);
-
   nb::class_<MessageFactory, MessageFactoryTrampoline>(m, "MessageFactory")
     .def("message_factory", &MessageFactory::message_factory);
 

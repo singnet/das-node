@@ -2,7 +2,6 @@ from hyperon_das_node import AtomSpaceNode, Message, LeadershipBrokerType, Messa
 
 class PrintMessage(Message):
     def __init__(self, content: str):
-        super().__init__()
         self.content = content
 
     def act(node: "CacheNode") -> None:
