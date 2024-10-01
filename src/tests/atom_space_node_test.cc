@@ -18,7 +18,7 @@ public:
         this->command = command;
         this->args = args;
     }
-    void act(shared_ptr<NodeWrapper> node_wrapper);
+    void act(shared_ptr<MessageFactory> node);
 };
 
 class TestNode : public AtomSpaceNode {
@@ -79,10 +79,10 @@ public:
     }
 };
 
-void TestMessage::act(shared_ptr<NodeWrapper> node_wrapper) {
-    TestNode *node = (TestNode *) node_wrapper->node;
-    node->command = this->command;
-    node->args = this->args;
+void TestMessage::act(shared_ptr<MessageFactory> node) {
+    auto atom_space_node = dynamic_pointer_cast<TestNode>(node);
+    atom_space_node->command = this->command;
+    atom_space_node->args = this->args;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -164,14 +164,7 @@ TEST(AtomSpaceNode, communication) {
     TestNode *client1;
     TestNode *client2;
 
-    unsigned int num_repetitions = 5;
-    MessageBrokerType messaging_type;
-    for (unsigned int i = 0; i < num_repetitions; i++) {
-        if (Utils::flip_coin()) {
-            messaging_type = MessageBrokerType::RAM;
-        } else {
-            messaging_type = MessageBrokerType::GRPC;
-        }
+    for (auto messaging_type: {MessageBrokerType::RAM , MessageBrokerType::GRPC}) {
 
         server = new TestNode(
             server_id,

@@ -9,10 +9,6 @@ Message::Message() {
 Message::~Message() {
 }
 
-NodeWrapper::NodeWrapper(AtomSpaceNode *node) {
-    this->node = node;
-}
-
 // -------------------------------------------------------------------------------------------------
 // Specialized Message subclasses
 
@@ -23,6 +19,7 @@ NodeJoinedNetwork::NodeJoinedNetwork(string &node_id) {
     this->joining_node = node_id;
 }
 
-void NodeJoinedNetwork::act(shared_ptr<NodeWrapper> node_wrapper) {
-    node_wrapper->node->node_joined_network(this->joining_node);
+void NodeJoinedNetwork::act(shared_ptr<MessageFactory> node) {
+    auto atom_space_node = dynamic_pointer_cast<AtomSpaceNode>(node);
+    atom_space_node->node_joined_network(this->joining_node);
 }

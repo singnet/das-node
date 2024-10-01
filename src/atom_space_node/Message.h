@@ -10,19 +10,24 @@ using namespace std;
 namespace atom_space_node {
 
 class AtomSpaceNode;
+class Message;
 
 /**
- * Wrapper of nodes passed to act().
- *
- * This class is required to ease the integration with nano bind (a layer to expose public
- * API to Python callers.
- *
- * Nodes are wrapped into objects of this type in order to be passed to act().
+ * Interface to be implemented by nodes (concrete implementations of AtomSpaceNode) in order to
+ * provide a factory method for the types of messages defined in its specific network.
  */
-class NodeWrapper {
-    public:
-        NodeWrapper(AtomSpaceNode *node);
-        AtomSpaceNode *node;
+class MessageFactory {
+
+public:
+
+    /**
+     * Message factory method.
+     *
+     * @param command The command to be executed in the target nodes.
+     * @param args Arguments for the command.
+     * @return An object of the proper class to deal with the passed command.
+     */
+    virtual std::shared_ptr<Message> message_factory(string &command, vector<string> &args) = 0;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -52,7 +57,7 @@ public:
      *
      * @param node The AtomSpaceNode which received the Message.
      */
-    virtual void act(shared_ptr<NodeWrapper> node_wrapper) = 0;
+    virtual void act(shared_ptr<MessageFactory> node) = 0;
 
     /**
      * Empty constructor.
@@ -66,24 +71,6 @@ public:
 
 private:
 
-};
-
-/**
- * Interface to be implemented by nodes (concrete implementations of AtomSpaceNode) in order to
- * provide a factory method for the types of messages defined in its specific network.
- */
-class MessageFactory {
-
-public:
-
-    /**
-     * Message factory method.
-     *
-     * @param command The command to be executed in the target nodes.
-     * @param args Arguments for the command.
-     * @return An object of the proper class to deal with the passed command.
-     */
-    virtual std::shared_ptr<Message> message_factory(string &command, vector<string> &args) = 0;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -117,7 +104,7 @@ public:
     /**
      * Calls node->node_joined_neytwork() in the recipient node.
      */
-    void act(shared_ptr<NodeWrapper> node_wrapper);
+    void act(shared_ptr<MessageFactory> node);
 };
 
 } // namespace atom_space_node

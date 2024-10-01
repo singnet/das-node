@@ -138,12 +138,7 @@ void SynchronousSharedRAM::inbox_thread_method() {
             if (this->host_node == NULL) {
                 Utils::error("Invalid NULL host_node");
             }
-            // this->host_node is an AtomSpaceNode. However, inside this class it's known as a MessageFactory.
-            // The issue here is because we can't import AtomSpaceNode (because of cyclic dependency) so
-            // in this scope AtomSpaceNode is declared simply as "class AtomSpaceNode" (incomplete type).
-            // So we need to get the raw pointer out of the shared_ptr and cast it to AtomSpaceNode before
-            // using it to build the NodeWrapper.
-            message->act(shared_ptr<NodeWrapper>(new NodeWrapper((AtomSpaceNode *) (&(*(this->host_node))))));
+            message->act(this->host_node);
             delete message_data;
         } else {
             if (this->is_shutting_down()) {
@@ -203,8 +198,7 @@ void SynchronousGRPC::inbox_thread_method() {
             if (this->host_node == NULL) {
                 Utils::error("Invalid NULL host_node");
             }
-            // See comment in similar call above
-            message->act(shared_ptr<NodeWrapper>(new NodeWrapper((AtomSpaceNode *) (&(*(this->host_node))))));
+            message->act(this->host_node);
         } else {
             if (this->is_shutting_down()) {
                 stop_flag = true;
