@@ -27,7 +27,7 @@ public:
      * @param args Arguments for the command.
      * @return An object of the proper class to deal with the passed command.
      */
-    virtual std::shared_ptr<Message> message_factory(string &command, vector<string> &args) = 0;
+    virtual shared_ptr<Message> message_factory(string &command, vector<string> &args) = 0;
 };
 
 // -------------------------------------------------------------------------------------------------

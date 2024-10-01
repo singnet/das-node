@@ -44,6 +44,9 @@ shared_ptr<MessageBroker> MessageBroker::factory(
 }
 
 MessageBroker::MessageBroker(shared_ptr<MessageFactory> host_node, const string &node_id) {
+    if (! host_node) {
+        Utils::error("Invalid NULL host_node");
+    }
     this->host_node = host_node;
     this->node_id = node_id;
     this->shutdown_flag = false;
@@ -131,15 +134,14 @@ void SynchronousSharedRAM::inbox_thread_method() {
                 }
                 this->peers_mutex.unlock();
             }
-            if (this->host_node == NULL) {
-                Utils::error("Invalid NULL host_node");
-            }
             std::shared_ptr<Message> message = this->host_node->message_factory(message_data->command, message_data->args);
-            if (! message) {
+            if (message) {
+                message->act(this->host_node);
+                delete message_data;
+            } else {
+                delete message_data;
                 Utils::error("Invalid NULL Message");
             }
-            message->act(this->host_node);
-            delete message_data;
         } else {
             if (this->is_shutting_down()) {
                 stop_flag = true;
@@ -191,14 +193,13 @@ void SynchronousGRPC::inbox_thread_method() {
             for (int i = 0; i < num_args; i++) {
                 args.push_back(message_data->args(i));
             }
-            if (this->host_node == NULL) {
-                Utils::error("Invalid NULL host_node");
-            }
+            delete message_data;
             std::shared_ptr<Message> message = this->host_node->message_factory(command, args);
-            if (! message) {
+            if (message) {
+                message->act(this->host_node);
+            } else {
                 Utils::error("Invalid NULL Message");
             }
-            message->act(this->host_node);
         } else {
             if (this->is_shutting_down()) {
                 stop_flag = true;
