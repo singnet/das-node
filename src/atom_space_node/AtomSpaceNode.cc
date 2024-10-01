@@ -25,9 +25,9 @@ AtomSpaceNode::~AtomSpaceNode() {
 // Public API
 
 void AtomSpaceNode::join_network() {
-    this->message_broker->join_network();
-    Utils::sleep(1000);
     this->leadership_broker->set_message_broker(this->message_broker);
+    this->message_broker->join_network();
+    //Utils::sleep(1000);
     string my_leadership_vote = this->cast_leadership_vote();
     this->leadership_broker->start_leader_election(my_leadership_vote);
     while (! this->has_leader()) {

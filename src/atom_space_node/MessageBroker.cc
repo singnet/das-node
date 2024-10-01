@@ -88,7 +88,7 @@ SynchronousGRPC::~SynchronousGRPC() {
         for (auto thread: inbox_threads) {
             thread->join();
         }
-        grpc_server->Shutdown();
+        this->grpc_server->Shutdown();
     }
 }
 
@@ -96,17 +96,15 @@ SynchronousGRPC::~SynchronousGRPC() {
 // Methods used to start threads
 
 void SynchronousGRPC::grpc_thread_method() {
-    std::string server_address = this->node_id;
-    grpc::EnableDefaultHealthCheckService(true);
+    grpc::EnableDefaultHealthCheckService(false);
     grpc::reflection::InitProtoReflectionServerBuilderPlugin();
     grpc::ServerBuilder builder;
-    builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
+    builder.AddListeningPort(this->node_id, grpc::InsecureServerCredentials());
     builder.RegisterService(this);
-    std::cout << "SynchronousGRPC listening on " << server_address << std::endl;
-    std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-    grpc_server = std::move(server);
+    std::cout << "SynchronousGRPC listening on " << this->node_id << std::endl;
+    this->grpc_server = builder.BuildAndStart();
     set_grpc_server_started();
-    grpc_server->Wait();
+    this->grpc_server->Wait();
 }
 
 void SynchronousSharedRAM::inbox_thread_method() {
