@@ -5,11 +5,11 @@ class PrintMessage(Message):
         super().__init__()
         self.content = content
 
-    def act(self, node: "CacheNode") -> None:
+    def act(self, node: "SimpleNode") -> None:
         # ideally we should call a node.method in here 
         node.print_content(self.content)
 
-class CacheNode(AtomSpaceNode):
+class SimpleNode(AtomSpaceNode):
     def __init__(self, node_id: str, is_server: bool) -> None:
         super().__init__(
             node_id,
@@ -35,7 +35,7 @@ class CacheNode(AtomSpaceNode):
 
         return None
 
-class CacheNodeServer(CacheNode):
+class SimpleNodeServer(SimpleNode):
     def __init__(self, node_id: str) -> None:
         super().__init__(node_id, True)
 
@@ -45,7 +45,7 @@ class CacheNodeServer(CacheNode):
     def cast_leadership_vote(self) -> str:
         return self.node_id()
 
-class CacheNodeClient(CacheNode):
+class SimpleNodeClient(SimpleNode):
     def __init__(self, node_id: str, server_id: str) -> None:
         super().__init__(node_id, False)
         self.server_id = server_id
@@ -60,8 +60,8 @@ class CacheNodeClient(CacheNode):
 
 
 if __name__ == "__main__":
-    server = CacheNodeServer("localhost:35700")
-    client = CacheNodeClient("localhost:35701", "localhost:35700")
+    server = SimpleNodeServer("localhost:35700")
+    client = SimpleNodeClient("localhost:35701", "localhost:35700")
     server.join_network()
     client.join_network()
 
