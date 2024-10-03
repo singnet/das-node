@@ -2,7 +2,6 @@
 build
 **/bin
 bin
-**/bazel_assets
 docker
 .git
 
