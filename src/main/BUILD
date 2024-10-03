@@ -5,7 +5,6 @@ cc_library(
     srcs = glob(["*.cc"]),
     hdrs = glob(["*.h"]),
     deps = [
-        "//cache_node:cache_node_lib",
         "//commons:commons_lib",
         "//atom_space_node:atom_space_node_lib",
         "@com_github_grpc_grpc//:grpc++",

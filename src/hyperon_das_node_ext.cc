@@ -8,14 +8,12 @@
 #include "atom_space_node/Message.h"
 #include "atom_space_node/MessageBroker.h"
 #include "atom_space_node/LeadershipBroker.h"
-#include "cache_node/CacheNode.h"
 
 namespace nb = nanobind;
 using namespace nb::literals;
 
 using namespace std;
 using namespace atom_space_node;
-using namespace cache_node;
 
 using MessagePtr = shared_ptr<Message>;
 using MessageFactoryPtr = shared_ptr<MessageFactory>;
@@ -115,16 +113,4 @@ NB_MODULE(hyperon_das_node_ext, m) {
       "node_id"_a)
     .def("cast_leadership_vote", &AtomSpaceNode::cast_leadership_vote)
     .def("message_factory", &AtomSpaceNode::message_factory);
-
-  // cache_node submodle
-  nb::module_ cache_node = m.def_submodule("cache_node");
-  nb::class_<CacheNode, AtomSpaceNode>(cache_node, "CacheNode")
-    .def("message_factory", &CacheNode::message_factory);
-
-  nb::class_<CacheNodeServer, AtomSpaceNode>(cache_node, "CacheNodeServer")
-    .def(nb::init<const string&>());
-
-  nb::class_<CacheNodeClient, CacheNode>(cache_node, "CacheNodeClient")
-    .def(nb::init<const string&, string&>());
-  // END cache_module
 }

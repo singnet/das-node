@@ -8,7 +8,6 @@ cc_binary(
     features = ["fully_static_link"],
     deps = [
         "//atom_space_node:atom_space_node_lib",
-        "//cache_node:cache_node_lib",
         "//main:main_lib",
         "//commons:commons_lib",
         "@com_github_singnet_das_proto//:atom_space_node_cc_grpc",
