@@ -1,5 +1,5 @@
 from unittest import TestCase
-from hyperon_das_node import cache_node
+from examples import cache_node
 
 
 class TestCacheNode(TestCase):
