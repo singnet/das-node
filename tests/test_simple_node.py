@@ -1,17 +1,17 @@
 from unittest import TestCase
-from examples import cache_node
+from examples import simple_node
 
 
-class TestCacheNode(TestCase):
+class TestSimpleNode(TestCase):
 
     def test_cache_node(self):
         self.server_id: str = "localhost:35700"
         self.client1_id: str = "localhost:35701"
         self.client2_id: str = "localhost:35702"
 
-        self.server = cache_node.CacheNodeServer(self.server_id)
-        self.client1 = cache_node.CacheNodeClient(self.client1_id, self.server_id)
-        self.client2 = cache_node.CacheNodeClient(self.client2_id, self.server_id)
+        self.server = cache_node.SimpleNodeServer(self.server_id)
+        self.client1 = cache_node.SimpleNodeClient(self.client1_id, self.server_id)
+        self.client2 = cache_node.SimpleNodeClient(self.client2_id, self.server_id)
 
         # There should be no leader
         self.assertFalse(self.server.has_leader())
