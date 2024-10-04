@@ -30,8 +30,8 @@ class SimpleNode(AtomSpaceNode):
         if message is not None:
             return message
 
-        message = PrintMessage(content=args[0])
-        return message
+        if klass:=self.known_commands.get(command):
+            return klass(*args)
 
         return None
 

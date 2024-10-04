@@ -85,6 +85,7 @@ NB_MODULE(hyperon_das_node_ext, m) {
     .value("RAM", MessageBrokerType::RAM);
 
   // AtomSpaceNode.h bindings
+<<<<<<< HEAD
   nb::class_<AtomSpaceNode, MessageFactory, AtomSpaceNodeTrampoline>(
       m, "AtomSpaceNode")
       .def(nb::init<string, LeadershipBrokerType, MessageBrokerType>(),
@@ -104,4 +105,28 @@ NB_MODULE(hyperon_das_node_ext, m) {
            "node_id"_a)
       .def("cast_leadership_vote", &AtomSpaceNode::cast_leadership_vote)
       .def("message_factory", &AtomSpaceNode::message_factory);
+=======
+  nb::class_<AtomSpaceNode, MessageFactory, AtomSpaceNodeTrampoline>(m, "AtomSpaceNode")
+    .def(nb::init<string, LeadershipBrokerType, MessageBrokerType>(), "node_id"_a, "leadership_algorithm"_a, "messaging_backend"_a)
+    .def("join_network", &AtomSpaceNode::join_network)
+    .def("is_leader", &AtomSpaceNode::is_leader)
+    .def("leader_id", &AtomSpaceNode::leader_id)
+    .def("has_leader", &AtomSpaceNode::has_leader)
+    .def("add_peer", &AtomSpaceNode::add_peer, "peer_id"_a)
+    .def("node_id", &AtomSpaceNode::node_id)
+    .def("broadcast", &AtomSpaceNode::broadcast, "command"_a, "args"_a)
+    .def("broadcast2", &AtomSpaceNode::broadcast)
+    .def(
+      "send",
+      &AtomSpaceNode::send,
+      "command"_a,
+      "args"_a,
+      "recipient"_a)
+    .def(
+      "node_joined_network",
+      &AtomSpaceNode::node_joined_network,
+      "node_id"_a)
+    .def("cast_leadership_vote", &AtomSpaceNode::cast_leadership_vote)
+    .def("message_factory", &AtomSpaceNode::message_factory);
+>>>>>>> master
 }

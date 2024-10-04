@@ -105,6 +105,7 @@ We are using a docker image with `bazel` installed. To build the image you can r
 # This will build the cpp code and copy files of interest to bazel_assets dir
 cd src
 ../scripts/bazel_build.sh
+cd ..
 ```
 
 Once the image is built and the code is built, all the libraries will be copied to a folder named `bazel_assets`.
@@ -126,3 +127,7 @@ pip wheel .
 ```
 
 The output of the wheel can be copied to the local machine and installed manually. 
+
+## Examples
+
+Inside the examples folder you can find a number of examples of how to use the library. The `simple_node.py` shows a very simple example of how to use the library.
