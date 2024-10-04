@@ -1,10 +1,15 @@
 # Hyperon Distributed Atomspace Node
 
-Atomspace is the hypergraph OpenCog Hyperon uses to represent and store
-knowledge, being the source of knowledge for AI agents and the container of any
-computational result that might be created or achieved during their execution.
+The Distributed AtomSpace Node (aka DAS Node) is a component of DAS
+(<https://github.com/singnet/das>) which allows the implementation of
+distributed algorithms using one or more DAS as shared knowledge base.
 
-The Atomspace *Node* provides a way to run a distributed algorithm on a network.
+This component is aimed at two different use cases:
+
+DAS' query engine uses it to implement a distributed algorithm for query
+resolution. Users of DAS libraries can use it to implement distributed
+algorithms by exploring primitives like leadership election and message
+exchanging built in the component.
 
 ## Features
 
