@@ -1,32 +1,35 @@
 name: Publish to PyPI
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "Version"
-        required: true
+  push:
+    branches:
+      - das-node-29
+
+  # workflow_dispatch:
+  #   inputs:
+  #     version:
+  #       description: "Version"
+  #       required: true
 
 jobs:
-  tag:
-    if: github.ref == 'refs/heads/master'
-    uses: singnet/das/.github/workflows/run-semver.yml@master
-    with:
-      version: ${{ github.event.inputs.version }}
-      version-strategy: bump-version-from-variable-value
-      job-image-namespace: trueagi
-      job-image-version-semver: semantic-versioning
-      main-branch: master
-      version-tag-regex-pattern: /^\d+\.\d+\.\d+$/
-      version-require-confirmation: "true"
-      title: New version of hyperon-das-node
-      deliverable: Library in PyPI named hyperon-das-node
-    secrets: inherit
+  # tag:
+  #   uses: singnet/das/.github/workflows/run-semver.yml@master
+  #   with:
+  #     version: ${{ github.event.inputs.version }}
+  #     version-strategy: bump-version-from-variable-value
+  #     job-image-namespace: trueagi
+  #     job-image-version-semver: semantic-versioning
+  #     main-branch: master
+  #     version-tag-regex-pattern: /^\d+\.\d+\.\d+$/
+  #     version-require-confirmation: "true"
+  #     title: New version of hyperon-das-node
+  #     deliverable: Library in PyPI named hyperon-das-node
+  #   secrets: inherit
 
   build:
     runs-on: ubuntu-22.04
-    needs: tag
-    if: github.ref == 'refs/heads/master'
+    # needs: tag
+    # if: github.ref == 'refs/heads/master'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
