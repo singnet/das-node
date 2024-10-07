@@ -35,13 +35,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build (Docker Image)
-        run: ./script/docker_image_build.sh
+        run: ./scripts/docker_image_build.sh
 
       - name: Build (Bazel)
-        run: ./script/build.sh
+        run: ./scripts/build.sh
 
       - name: Build and publish pypi
-        run: ./script/container_tty.sh cat<<EOF
+        run: ./scripts/container_tty.sh cat<<EOF
           pip install .
           pip install twine
           twine upload dist/* --username __token__ --password ${{ secrets.PYPI_API_TOKEN }} --non-interactive
