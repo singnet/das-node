@@ -41,8 +41,7 @@ jobs:
         run: ./scripts/build.sh
 
       - name: Build and publish pypi
-        run: ./scripts/container_tty.sh cat<<EOF
-          pip install .
-          pip install twine
-          twine upload dist/* --username __token__ --password ${{ secrets.PYPI_API_TOKEN }} --non-interactive
-          EOF
+        run: |
+          ./scripts/container_tty.sh "pip install . && \
+                                      pip install twine && \
+                                      twine upload dist/* --username __token__ --password ${{ secrets.PYPI_API_TOKEN }} --non-interactive"
