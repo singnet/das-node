@@ -4,8 +4,10 @@ CONTAINER_NAME="das-node-bash"
 
 if [ -n "$1" ]; then
     CMD="$1"
+    INTERACTIVE="-i" 
 else
     CMD="bash"
+    INTERACTIVE="-it" 
 fi
 
 docker run \
@@ -13,8 +15,8 @@ docker run \
     --name=$CONTAINER_NAME \
     --volume .:/opt/hyperon_das_node \
     --volume /tmp:/tmp \
-    -it das-node-builder \
-   bash -c "$CMD"
+    $INTERACTIVE das-node-builder \
+    bash -c "$CMD"
 
 sleep 1
 docker rm $CONTAINER_NAME >& /dev/null
