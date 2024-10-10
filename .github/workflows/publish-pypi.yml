@@ -40,8 +40,14 @@ jobs:
       - name: Build (Bazel)
         run: ./scripts/build.sh
 
-      - name: Build and publish pypi
-        run: |
-          ./scripts/container_tty.sh "pip install . && \
-                                      pip install twine && \
-                                      twine upload dist/* --username __token__ --password ${{ secrets.PYPI_API_TOKEN }} --non-interactive"
+      - name: Build (Docker Image Wheel)
+        run: ./scripts/docker_image_wheel.sh
+
+      - name: Build (Wheel)
+        run: ./scripts/wheel.sh
+
+      - name: Install twine
+        run: pip install twine
+        
+      - name: Publish Package
+        run: twine upload wheelhouse/* --username __token__ --password ${{ secrets.PYPI_API_TOKEN }} --non-interactive
