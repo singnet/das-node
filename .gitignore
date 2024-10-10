@@ -173,3 +173,4 @@ pyrightconfig.json
 bin/
 bazel_assets
 src/bazel-*
+*.whl
