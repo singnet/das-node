@@ -31,7 +31,7 @@ class TestNode(AtomSpaceNode):
         super().__init__(node_id, leadership_algorithm, messaging_backend)
 
         self.node_joined_network_count = 0
-        self.is_server = is_server;
+        self.is_server = is_server
         if is_server:
             self.server_id = ""
         else:
@@ -44,7 +44,7 @@ class TestNode(AtomSpaceNode):
         if self.is_server:
             return self.node_id()
         else:
-            return self.server_id;
+            return self.server_id
 
     def node_joined_network(self, node_id: str) -> None:
         self.node_joined_network_count += 1
@@ -52,7 +52,7 @@ class TestNode(AtomSpaceNode):
             self.add_peer(node_id)
 
     def message_factory(self, command: str, args: List[str]) -> Message:
-        message = super().message_factory(command, args);
+        message = super().message_factory(command, args)
         if message:
             return message
         elif command in ["c1", "c2", "c3"]:
@@ -109,8 +109,6 @@ class TestAtomSpaceNode(TestCase):
             assert client1.node_id() == client1_id
             assert client2.node_id() == client2_id
 
-class TestAtomSpaceNode(TestCase):
-
     def test_communication(self):
 
         server_id = "localhost:30700"
@@ -151,8 +149,8 @@ class TestAtomSpaceNode(TestCase):
             assert client2.args == args1
 
             args2 = ["a2", "b2"]
-            server.send("c2", args2, client1_id);
-            time.sleep(1);
+            server.send("c2", args2, client1_id)
+            time.sleep(1)
 
             assert server.command == ""
             assert server.args == []

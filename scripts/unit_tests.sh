@@ -6,9 +6,9 @@ mkdir -p bin
 docker run \
     --name=$CONTAINER_NAME \
     --volume .:/opt/das-node \
-    --workdir /opt/das-node/src \
+    --workdir /opt/das-node/ \
     das-node-builder \
-    ../scripts/bazel_test.sh
+    ../scripts/test_all.sh.sh
 
 sleep 1
 docker rm $CONTAINER_NAME
