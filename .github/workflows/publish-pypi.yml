@@ -50,4 +50,4 @@ jobs:
         run: pip install twine
         
       - name: Publish Package
-        run: twine upload $(ls ./wheelhouse/ | head -n 1) --username __token__ --password ${{ secrets.PYPI_API_TOKEN }} --non-interactive
+        run: twine upload $(find . -name *.whl | head -n 1) --username __token__ --password ${{ secrets.PYPI_API_TOKEN }} --non-interactive
