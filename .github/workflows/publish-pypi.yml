@@ -48,6 +48,7 @@ jobs:
 
       - name: Install twine
         run: pip install twine
-        
+
       - name: Publish Package
+        working-directory: wheelhouse
         run: twine upload $(find . -name *.whl | head -n 1) --username __token__ --password ${{ secrets.PYPI_API_TOKEN }} --non-interactive
