@@ -46,4 +46,4 @@ ENV PYTHON_LIBRARY=/usr/local/lib/libpython3.10.so
 COPY . .
 
 # Build the wheel
-CMD ["python3.10", "-m", "pip", "wheel", "."]
+CMD ["sh", "-c", "python3.10 -m pip wheel . && auditwheel repair $(find . -name '*.whl' | head -n 1)"]
