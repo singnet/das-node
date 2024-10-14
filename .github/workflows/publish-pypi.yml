@@ -1,38 +1,38 @@
 name: Publish to PyPI
 
 on:
-  push:
-    branches:
-      - das-node-29
-
-  # workflow_dispatch:
-  #   inputs:
-  #     version:
-  #       description: "Version"
-  #       required: true
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version"
+        required: true
 
 jobs:
-  # tag:
-  #   uses: singnet/das/.github/workflows/run-semver.yml@master
-  #   with:
-  #     version: ${{ github.event.inputs.version }}
-  #     version-strategy: bump-version-from-variable-value
-  #     job-image-namespace: trueagi
-  #     job-image-version-semver: semantic-versioning
-  #     main-branch: master
-  #     version-tag-regex-pattern: /^\d+\.\d+\.\d+$/
-  #     version-require-confirmation: "true"
-  #     title: New version of hyperon-das-node
-  #     deliverable: Library in PyPI named hyperon-das-node
-  #   secrets: inherit
+  tag:
+    uses: singnet/das/.github/workflows/run-semver.yml@master
+    with:
+      version: ${{ github.event.inputs.version }}
+      version-strategy: bump-version-from-variable-value
+      job-image-namespace: trueagi
+      job-image-version-semver: semantic-versioning
+      main-branch: master
+      version-tag-regex-pattern: /^\d+\.\d+\.\d+$/
+      version-require-confirmation: "true"
+      title: New version of hyperon-das-node
+      deliverable: Library in PyPI named hyperon-das-node
+    secrets: inherit
 
-  build:
+  publish:
     runs-on: ubuntu-22.04
-    # needs: tag
-    # if: github.ref == 'refs/heads/master'
+    needs: tag
+    if: github.ref == 'refs/heads/master'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Update version
+        run: sed -i "s/version=.*/version='${{ github.event.inputs.version }}',/" pyproject.toml
+  
 
       - name: Build (Docker Image)
         run: ./scripts/docker_image_build.sh
