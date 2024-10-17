@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CONTAINER_NAME="das-node-wheel"
+CONTAINER_NAME="das-node-wheeler"
 
 docker run \
     --name=$CONTAINER_NAME \
