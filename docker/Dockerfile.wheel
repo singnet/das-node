@@ -1,49 +1,15 @@
 # Base image from manylinux for x86_64
 FROM quay.io/pypa/manylinux_2_28_x86_64
 
-# Install system dependencies
-RUN yum install -y \
-    cmake \
-    gcc \
-    make \
-    openssl-devel \
-    bzip2-devel \
-    libffi-devel \
-    zlib-devel \
-    wget \
-    && yum clean all
+# Set the correct Python paths for CMake
+ENV PYTHON_PATH=/opt/python/cp310-cp310
+ENV PYTHON_EXECUTABLE=${PYTHON_PATH}/bin/python3.10
 
-# Install Python 3.10
-WORKDIR /tmp
-RUN wget https://www.python.org/ftp/python/3.10.12/Python-3.10.12.tgz \
-    && tar -xzf Python-3.10.12.tgz \
-    && cd Python-3.10.12 \
-    && ./configure --enable-optimizations \
-    && make -j$(nproc) \
-    && make altinstall \
-    && rm -rf /tmp/Python-3.10.12.tgz /tmp/Python-3.10.12
-
-# Ensure pip is installed and upgraded for Python 3.10
-RUN python3.10 -m ensurepip && \
-    python3.10 -m pip install --upgrade pip
-
-# Set Python 3.10 as default
-RUN ln -sf /usr/local/bin/python3.10 /usr/local/bin/python3 && \
-    ln -sf /usr/local/bin/pip3.10 /usr/local/bin/pip3
+# Install wheel (required for building wheels)
+RUN ${PYTHON_EXECUTABLE} -m pip install wheel auditwheel
 
 # Set the working directory
 WORKDIR /hyperon_das_node
 
-# Install wheel (required for building wheels)
-RUN python3.10 -m pip install wheel
-
-# Set the correct Python paths for CMake
-ENV PYTHON_EXECUTABLE=/usr/local/bin/python3.10
-ENV PYTHON_INCLUDE_DIR=/usr/local/include/python3.10
-ENV PYTHON_LIBRARY=/usr/local/lib/libpython3.10.so
-
-# Copy the current directory contents into the container
-COPY . .
-
 # Build the wheel
-CMD ["sh", "-c", "python3.10 -m pip wheel . && auditwheel repair $(find . -name '*.whl' | head -n 1)"]
+CMD ["bash", "-x", "./scripts/_build_wheel.sh"]
