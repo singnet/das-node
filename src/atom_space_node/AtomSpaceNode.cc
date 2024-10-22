@@ -19,6 +19,7 @@ AtomSpaceNode::AtomSpaceNode(
 }
 
 AtomSpaceNode::~AtomSpaceNode() {
+    this->graceful_shutdown();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -76,4 +77,8 @@ std::shared_ptr<Message> AtomSpaceNode::message_factory(string &command, vector<
     } else {
         return std::shared_ptr<Message>{};
     }
+}
+
+void AtomSpaceNode::graceful_shutdown() {
+    this->message_broker->graceful_shutdown();
 }

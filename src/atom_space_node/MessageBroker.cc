@@ -63,7 +63,6 @@ SynchronousSharedRAM::SynchronousSharedRAM(
 
 SynchronousSharedRAM::~SynchronousSharedRAM() {
     if (this->joined_network) {
-        graceful_shutdown();
         for (auto thread: inbox_threads) {
             thread->join();
         }
@@ -87,7 +86,6 @@ SynchronousGRPC::SynchronousGRPC(
 
 SynchronousGRPC::~SynchronousGRPC() {
     if (this->joined_network) {
-        graceful_shutdown();
         for (auto thread: inbox_threads) {
             thread->join();
         }
