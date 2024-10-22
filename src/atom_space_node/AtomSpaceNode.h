@@ -150,6 +150,11 @@ public:
      */
     virtual shared_ptr<Message> message_factory(string &command, vector<string> &args);
 
+    /**
+     * Gracefully shuts down threads or any other resources being used.
+     */
+    virtual void graceful_shutdown();
+
     // --------------------------------------------------------------------------------------------
     // API to be extended by concrete subclasses
 
