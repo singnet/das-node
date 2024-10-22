@@ -38,7 +38,6 @@ cc_test(
     ],
     deps = [
         "@com_github_google_googletest//:gtest_main",
-        "//cache_node:cache_node_lib",
         "//atom_space_node:atom_space_node_lib",
     ],
     linkstatic = 1
