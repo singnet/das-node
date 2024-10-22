@@ -54,8 +54,6 @@ public:
 
     /**
      * Destructor.
-     *
-     * TODO: Implement a graceful shutdown of all components
      */
     virtual ~AtomSpaceNode();
 
