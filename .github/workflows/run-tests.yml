@@ -23,6 +23,9 @@ jobs:
           python-version: ~3.10
           cache: "pip"
 
+      - name: Build Wheel
+        run: make wheel 
+
       - name: Execute Python Unit Test
         run: make test-python
 
