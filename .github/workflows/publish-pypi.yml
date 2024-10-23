@@ -8,7 +8,12 @@ on:
         required: true
 
 jobs:
+  code-quality:
+    uses: ./.github/workflows/run-tests.yml
+    secrets: inherit
+
   tag:
+    needs: code-quality
     uses: singnet/das/.github/workflows/run-semver.yml@master
     with:
       version: ${{ github.event.inputs.version }}
@@ -32,7 +37,6 @@ jobs:
 
       - name: Update version
         run: sed -i "s/version=.*/version='${{ github.event.inputs.version }}',/" pyproject.toml
-  
 
       - name: Build (Docker Image)
         run: ./scripts/docker_image_build.sh
