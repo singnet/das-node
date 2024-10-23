@@ -70,4 +70,4 @@ jobs:
         run: make bazel-build
 
       - name: Execute C++ Unit Test
-        run: docker run --rm -i bash -c "make test-cpp"
+        run: docker run --rm -i das-node-builder  make test-cpp
