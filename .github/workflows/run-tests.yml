@@ -23,6 +23,9 @@ jobs:
           python-version: ~3.10
           cache: "pip"
 
+      - name: Build Bazel
+        run: make bazel-build
+
       - name: Build Wheel
         run: make wheel
 
