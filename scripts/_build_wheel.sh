@@ -22,7 +22,7 @@ find ${TMP_DEST_DIR} -type f -name "*.whl" \
 [ $? -ne 0 ] && exit 1
 
 # Change ownership
-chown -R ${_USER}:${_GROUP} ${DEST_DIR}
+chown -R ${_USER}:${_USER} ${DEST_DIR}
 [ $? -ne 0 ] && exit 1
 
 # Clean up
