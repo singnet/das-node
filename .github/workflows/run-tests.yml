@@ -1,0 +1,31 @@
+---
+name: Run DAS Node tests
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - edited
+      - synchronize
+
+  workflow_dispatch:
+
+jobs:
+  cpp-tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Running tests
+        run: make cpp-test
+
+  wheel-test:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Running tests
+        run: make wheeler-test
