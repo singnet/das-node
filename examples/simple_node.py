@@ -1,4 +1,4 @@
-from hyperon_das_node import AtomSpaceNode, Message, LeadershipBrokerType, MessageBrokerType
+from hyperon_das_node import DistributedAlgorithmNode, Message, LeadershipBrokerType, MessageBrokerType
 
 class PrintMessage(Message):
     def __init__(self, content: str):
@@ -9,7 +9,7 @@ class PrintMessage(Message):
         # ideally we should call a node.method in here 
         node.print_content(self.content)
 
-class SimpleNode(AtomSpaceNode):
+class SimpleNode(DistributedAlgorithmNode):
     def __init__(self, node_id: str, is_server: bool) -> None:
         super().__init__(
             node_id,

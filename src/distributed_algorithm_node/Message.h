@@ -1,5 +1,5 @@
-#ifndef _ATOM_SPACE_NODE_MESSAGE_H
-#define _ATOM_SPACE_NODE_MESSAGE_H
+#ifndef _DISTRIBUTED_ALGORITHM_NODE_MESSAGE_H
+#define _DISTRIBUTED_ALGORITHM_NODE_MESSAGE_H
 
 #include <string>
 #include <vector>
@@ -7,13 +7,13 @@
 
 using namespace std;
 
-namespace atom_space_node {
+namespace distributed_algorithm_node {
 
-class AtomSpaceNode;
+class DistributedAlgorithmNode;
 class Message;
 
 /**
- * Interface to be implemented by nodes (concrete implementations of AtomSpaceNode) in order to
+ * Interface to be implemented by nodes (concrete implementations of DistributedAlgorithmNode) in order to
  * provide a factory method for the types of messages defined in its specific network.
  */
 class MessageFactory {
@@ -55,7 +55,7 @@ public:
      * Executes the action defined in the Message in the recipient node, which is passed as
      * parameter.
      *
-     * @param node The AtomSpaceNode which received the Message.
+     * @param node The DistributedAlgorithmNode which received the Message.
      */
     virtual void act(shared_ptr<MessageFactory> node) = 0;
 
@@ -74,11 +74,11 @@ private:
 };
 
 // -------------------------------------------------------------------------------------------------
-// Concrete Messages used in basic AtomSpaceNode settings
+// Concrete Messages used in basic DistributedAlgorithmNode settings
 
 /**
  * Concrete Message implementation to deal with command "node_join_network", used
- * by AtomSpaceNode to notify other nodes in the network of the presence of a newly
+ * by DistributedAlgorithmNode to notify other nodes in the network of the presence of a newly
  * joined node.
  */
 class NodeJoinedNetwork : public Message {
@@ -107,6 +107,6 @@ public:
     void act(shared_ptr<MessageFactory> node);
 };
 
-} // namespace atom_space_node
+} // namespace distributed_algorithm_node
 
-#endif // _ATOM_SPACE_NODE_MESSAGE_H
+#endif // _DISTRIBUTED_ALGORITHM_NODE_MESSAGE_H

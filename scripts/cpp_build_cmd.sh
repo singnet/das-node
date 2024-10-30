@@ -27,6 +27,12 @@ cp -r bazel-src/external/com_github_grpc_grpc/include/grpc $output/
 cp -r bazel-src/external/com_github_grpc_grpc/include/grpcpp/ $output/
 cp -r bazel-src/external/com_google_absl/absl/ $output/
 cp -r bazel-src/external/com_google_protobuf/src/google/ $output/
+
+# TODO: Once das-proto is updated, update atom_space_node to distributed_algorithm_node
+
+# cp bazel-bin/external/com_github_singnet_das_proto/distributed_algorithm_node.grpc.pb.h $output/
+# cp bazel-bin/external/com_github_singnet_das_proto/distributed_algorithm_node.pb.h $output/
 cp bazel-bin/external/com_github_singnet_das_proto/atom_space_node.grpc.pb.h $output/
 cp bazel-bin/external/com_github_singnet_das_proto/atom_space_node.pb.h $output/
+
 cp bazel-bin/external/com_github_singnet_das_proto/common.pb.h $output/

@@ -53,12 +53,12 @@ find_package(nanobind CONFIG REQUIRED)
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets
   ${CMAKE_CURRENT_SOURCE_DIR}/src/commons
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/atom_space_node)
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/distributed_algorithm_node)
 
 file(GLOB_RECURSE headers
   ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets/*.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/commons/*.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/atom_space_node/*.h)
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/distributed_algorithm_node/*.h)
 
 nanobind_add_module(
   ${EXTENSION_NAME} 

@@ -8,13 +8,18 @@
 
 
 #include "common.pb.h"
+
+// TODO: Once das-proto is updated, update atom_space_node to distributed_algorithm_node
+
+// #include "distributed_algorithm_node.grpc.pb.h"
+// #include "distributed_algorithm_node.pb.h"
 #include "atom_space_node.grpc.pb.h"
 #include "atom_space_node.pb.h"
 
 #include "Utils.h"
 #include "MessageBroker.h"
 
-using namespace atom_space_node;
+using namespace distributed_algorithm_node;
 
 unsigned int SynchronousGRPC::MESSAGE_THREAD_COUNT = 10;
 unsigned int SynchronousSharedRAM::MESSAGE_THREAD_COUNT = 1;
@@ -177,6 +182,8 @@ void SynchronousGRPC::inbox_thread_method() {
                     this->peers_mutex.lock();
                     for (auto target: this->peers) {
                         if (visited.find(target) == visited.end()) {
+                            // TODO: Once das-proto is updated, update atom_space_node to distributed_algorithm_node
+                            // auto stub = dasproto::DistributedAlgorithmNode::NewStub(grpc::CreateChannel(target, grpc::InsecureChannelCredentials()));
                             auto stub = dasproto::AtomSpaceNode::NewStub(grpc::CreateChannel(target, grpc::InsecureChannelCredentials()));
                             stub->execute_message(&(context[cursor]), *message_data, &(reply[cursor]));
                             cursor++;
@@ -335,6 +342,8 @@ void SynchronousGRPC::send(
     message_data.set_is_broadcast(false);
     dasproto::Empty reply;
     grpc::ClientContext context;
+    // TODO: Once das-proto is updated, update atom_space_node to distributed_algorithm_node
+    // auto stub = dasproto::DistributedAlgorithmNode::NewStub(grpc::CreateChannel(recipient, grpc::InsecureChannelCredentials()));
     auto stub = dasproto::AtomSpaceNode::NewStub(grpc::CreateChannel(recipient, grpc::InsecureChannelCredentials()));
     stub->execute_message(&context, message_data, &reply);
 }
@@ -358,6 +367,8 @@ void SynchronousGRPC::broadcast(const string &command, const vector<string> &arg
         message_data.set_sender(this->node_id);
         message_data.set_is_broadcast(true);
         message_data.add_visited_recipients(this->node_id);
+        // TODO: Once das-proto is updated, update atom_space_node to distributed_algorithm_node
+        // auto stub = dasproto::DistributedAlgorithmNode::NewStub(grpc::CreateChannel(peer_id, grpc::InsecureChannelCredentials()));
         auto stub = dasproto::AtomSpaceNode::NewStub(grpc::CreateChannel(peer_id, grpc::InsecureChannelCredentials()));
         stub->execute_message(&(context[cursor]), message_data, &(reply[cursor]));
         cursor++;

@@ -1,15 +1,15 @@
-# AtomSpaceNode Design
+# DistributedAlgorithmNode Design
 
-This is a design proposal of the Distributed AtomSpace (DAS) Node.
+This is a design proposal of the Distributed Atom Space (DAS) Algorithm Node.
 
 Initial design will focus on Messaging and Leader Election.
 
 ## Goals
 
-- Ensure the AtomSpaceNode is resilient to network failures.
-- Ensure the AtomSpaceNode is resilient to leader failures.
-- Ensure the AtomSpaceNode is resilient to job failures.
-- Ensure the AtomSpaceNode will satisfy the use case.
+- Ensure the `DistributedAlgorithmNode` is resilient to network failures.
+- Ensure the `DistributedAlgorithmNode` is resilient to leader failures.
+- Ensure the `DistributedAlgorithmNode` is resilient to job failures.
+- Ensure the `DistributedAlgorithmNode` will satisfy the use case.
 - Ensure Nodes run inside docker containers.
 - Ensure speedup of at least 70% \* N considering the
   execution in a network with N (1 < N < 6) equally resourced NODEs against the
@@ -25,9 +25,9 @@ job is requested.
 - USER: a person using the software we provide to execute JOBs in a network of
   NODEs.
 - NODE: a server process running on a Docker container encompassing all
-  components required to run a AtomSpaceNode.
+  components required to run a DistributedAlgorithmNode.
 - JOB: a data structure designed to contain a script in one of the script
-  languages supported by AtomSpaceNode. This script contains all the code required to
+  languages supported by DistributedAlgorithmNode. This script contains all the code required to
   execute a given task.
 - MESSAGE: a data structure to encapsulate pieces of information we want to
   transport from one NODE to another.
@@ -62,7 +62,7 @@ job is requested.
   and ordered delivery.
 - The messaging system will abstract the underlying network topology.
 - The messaging layer will be an external library. That way we can easily
-  change it, without changing the code of the AtomSpaceNode.
+  change it, without changing the code of the DistributedAlgorithmNode.
 
 #### Considered Topologies
 
@@ -210,7 +210,7 @@ Perform a single query to the remote DAS Server, process all the results and
 perform some extra computation on each result in order to evaluate each
 result's quality.
 
-JOB should be defined as a script in some programming language. AtomSpaceNode should
+JOB should be defined as a script in some programming language. DistributedAlgorithmNode should
 be able to support multiple programming languages here so the design must be
 flexible. Initially we'll support only Python scripts doing queries to a remote
 DAS Server.

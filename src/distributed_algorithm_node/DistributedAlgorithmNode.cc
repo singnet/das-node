@@ -1,10 +1,10 @@
-#include "AtomSpaceNode.h"
+#include "DistributedAlgorithmNode.h"
 #include "Utils.h"
 
-using namespace atom_space_node;
+using namespace distributed_algorithm_node;
 using namespace commons;
 
-AtomSpaceNode::AtomSpaceNode(
+DistributedAlgorithmNode::DistributedAlgorithmNode(
     const string &node_id,
     LeadershipBrokerType leadership_algorithm,
     MessageBrokerType messaging_backend) {
@@ -18,14 +18,14 @@ AtomSpaceNode::AtomSpaceNode(
         node_id);
 }
 
-AtomSpaceNode::~AtomSpaceNode() {
+DistributedAlgorithmNode::~DistributedAlgorithmNode() {
     this->graceful_shutdown();
 }
 
 // -------------------------------------------------------------------------------------------------
 // Public API
 
-void AtomSpaceNode::join_network() {
+void DistributedAlgorithmNode::join_network() {
     this->leadership_broker->set_message_broker(this->message_broker);
     this->message_broker->join_network();
     //Utils::sleep(1000);
@@ -39,31 +39,31 @@ void AtomSpaceNode::join_network() {
     this->message_broker->broadcast(this->known_commands.NODE_JOINED_NETWORK, args);
 }
 
-bool AtomSpaceNode::is_leader() {
+bool DistributedAlgorithmNode::is_leader() {
     return (this->leader_id() == this->node_id());
 }
 
-string AtomSpaceNode::leader_id() {
+string DistributedAlgorithmNode::leader_id() {
     return this->leadership_broker->leader_id();
 }
 
-bool AtomSpaceNode::has_leader() {
+bool DistributedAlgorithmNode::has_leader() {
     return this->leadership_broker->has_leader();
 }
 
-void AtomSpaceNode::add_peer(const string &peer_id) {
+void DistributedAlgorithmNode::add_peer(const string &peer_id) {
     this->message_broker->add_peer(peer_id);
 }
 
-string AtomSpaceNode::node_id() {
+string DistributedAlgorithmNode::node_id() {
     return this->my_node_id;
 }
 
-void AtomSpaceNode::broadcast(const string &command, const vector<string> &args) {
+void DistributedAlgorithmNode::broadcast(const string &command, const vector<string> &args) {
     this->message_broker->broadcast(command, args);
 }
 
-void AtomSpaceNode::send(
+void DistributedAlgorithmNode::send(
     const string &command, 
     const vector<string> &args, 
     const string &recipient) {
@@ -71,7 +71,7 @@ void AtomSpaceNode::send(
     this->message_broker->send(command, args, recipient);
 }
 
-std::shared_ptr<Message> AtomSpaceNode::message_factory(string &command, vector<string> &args) {
+std::shared_ptr<Message> DistributedAlgorithmNode::message_factory(string &command, vector<string> &args) {
     if (command == this->known_commands.NODE_JOINED_NETWORK) {
         return std::shared_ptr<Message>(new NodeJoinedNetwork(args[0]));
     } else {
@@ -79,6 +79,6 @@ std::shared_ptr<Message> AtomSpaceNode::message_factory(string &command, vector<
     }
 }
 
-void AtomSpaceNode::graceful_shutdown() {
+void DistributedAlgorithmNode::graceful_shutdown() {
     this->message_broker->graceful_shutdown();
 }

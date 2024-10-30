@@ -1,6 +1,6 @@
-# Hyperon Distributed Atomspace Node
+# Hyperon Distributed Atom Space Algorithm Node
 
-The Distributed AtomSpace Node (aka DAS Node) is a component of DAS
+The Distributed Atom Space Algorithm Node (aka DAS Node) is a component of DAS
 (<https://github.com/singnet/das>) which allows the implementation of
 distributed algorithms using one or more DAS as shared knowledge base.
 
@@ -13,9 +13,9 @@ exchanging built in the component.
 
 ## Features
 
-### AtomSpaceNode
+### DistributedAlgorithmNode
 
-AtomSpaceNode is an abstract class that represents a node in a network,
+DistributedAlgorithmNode is an abstract class that represents a node in a network,
 designed for distributed processing. Users must extend this class to implement
 custom distributed networks.
 
@@ -25,25 +25,25 @@ transmitted. Instead, a command identifier is sent, and the receiving node
 reconstructs and executes the corresponding Message object. The command format
 resembles a command-line interface, with commands and arguments.
 
-Key Points for Extending AtomSpaceNode:
+Key Points for Extending DistributedAlgorithmNode:
 
-  - AtomSpaceNode builds Message objects because it inherits from
+  - DistributedAlgorithmNode builds Message objects because it inherits from
   MessageFactory. The base class can create basic Message objects for common
   tasks, such as handling new nodes joining the network. However, subclasses
   should override message_factory() to handle application-specific messages.
 
   - Message execution is threaded. If commands update shared state in
-  AtomSpaceNode or its subclasses, you must protect this state using mutual
+  DistributedAlgorithmNode or its subclasses, you must protect this state using mutual
   exclusion mechanisms.
 
-  - The constructor for AtomSpaceNode requires a MessageBroker and a
+  - The constructor for DistributedAlgorithmNode requires a MessageBroker and a
   LeadershipBroker, both of which are abstract. You must choose concrete
   implementations or create your own, depending on the communication and
   leadership election strategies you want to use. Custom leadership algorithms
   may be needed, depending on the network topology and application
   requirements.
 
-  - AtomSpaceNode has several pure virtual methods that must be implemented by
+  - DistributedAlgorithmNode has several pure virtual methods that must be implemented by
   subclasses. These methods handle fundamental tasks, such as leadership
   elections and notifying nodes when new peers join the network.
 
@@ -61,7 +61,7 @@ invoke its act() method.
 
 LeadershipBroker defines the API for leader election in the network. Users
 typically don't interact with this class directly; it's managed by the
-AtomSpaceNode.
+DistributedAlgorithmNode.
 
 #### SingleMasterServer
 
@@ -72,7 +72,7 @@ clients.
 ### MessageBroker
 
 MessageBroker defines the API for the communication layer between nodes. Users
-of AtomSpaceNode don't interact with MessageBroker directly.
+of DistributedAlgorithmNode don't interact with MessageBroker directly.
 
 Currently there are two implementations: RAM and GRPC
 

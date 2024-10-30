@@ -1,7 +1,7 @@
 #include "Message.h"
-#include "AtomSpaceNode.h"
+#include "DistributedAlgorithmNode.h"
 
-using namespace atom_space_node;
+using namespace distributed_algorithm_node;
 
 Message::Message() {
 }
@@ -20,6 +20,6 @@ NodeJoinedNetwork::NodeJoinedNetwork(string &node_id) {
 }
 
 void NodeJoinedNetwork::act(shared_ptr<MessageFactory> node) {
-    auto atom_space_node = dynamic_pointer_cast<AtomSpaceNode>(node);
-    atom_space_node->node_joined_network(this->joining_node);
+    auto distributed_algorithm_node = dynamic_pointer_cast<DistributedAlgorithmNode>(node);
+    distributed_algorithm_node->node_joined_network(this->joining_node);
 }
