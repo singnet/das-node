@@ -3,7 +3,7 @@
 cpp-image:
 	@./scripts/cpp_image.sh
 
-cpp-build:
+cpp-build: cpp-image
 	@./scripts/cpp_build.sh
 
 cpp-test:
@@ -13,7 +13,7 @@ cpp-test:
 wheeler-image:
 	@./scripts/wheeler_image.sh
 
-wheeler-build:
+wheeler-build: wheeler-image
 	@./scripts/wheeler_build.sh
 
 wheeler-test:
