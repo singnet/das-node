@@ -10,6 +10,3 @@ RUN ${PYTHON_EXECUTABLE} -m pip install wheel auditwheel
 
 # Set the working directory
 WORKDIR /hyperon_das_node
-
-# Build the wheel
-CMD ["bash", "-x", "./scripts/_build_wheel.sh"]
