@@ -1,26 +1,31 @@
 
-bazel-image:
-	@./scripts/docker_image_build.sh
+# C++ commands:
+cpp-image:
+	@./scripts/cpp_image.sh
 
-bazel-build: bazel-image
-	@./scripts/build.sh
+cpp-build:
+	@./scripts/cpp_build.sh
 
+cpp-test:
+	@./scripts/cpp_test.sh
+
+# Python commands
 wheeler-image:
-	@./scripts/build_wheeler_docker_image.sh
+	@./scripts/wheeler_image.sh
 
-wheel: wheeler-image
-	@./scripts/run_wheeler.sh
+wheeler-build:
+	@./scripts/wheeler_build.sh
 
-install: wheel
-	@pip install ./dist/hyperon_das_atomdb_cpp*.whl --force-reinstall --no-cache-dir
+wheeler-test:
+	@./scripts/wheeler_test.sh
 
-test-cpp:
-	@./scripts/bazel_test.sh
+install:
+	@python3 -m pip install ./dist/hyperon_das_node*.whl --force-reinstall --no-cache-dir
 
-test-python:
-	@./scripts/python_tests.sh
+# Run all tests
+test-all: test-cpp test-python
 
-test-all:
-	@./scripts/test_all.sh
-
-
+# Clean docker volumes and build directories
+clean:
+	@docker volume rm bazel_cache
+	@rm -rf src/bazel-* bazel_assets build dist

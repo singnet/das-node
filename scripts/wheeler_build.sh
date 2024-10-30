@@ -9,4 +9,5 @@ docker run \
     -e GROUP=$(id -g) \
     --volume .:/opt/hyperon_das_node \
     --workdir /opt/hyperon_das_node \
-    das-node-wheeler
+    das-node-wheeler \
+    ./scripts/wheeler_build_cmd.sh
