@@ -34,6 +34,20 @@ jobs:
           docker tag das-node-builder:latest ghcr.io/${{ github.repository_owner }}/das-node-builder:${{ github.sha }}
           docker push ghcr.io/${{ github.repository_owner }}/das-node-builder:${{ github.sha }}
 
+      - name: Build bazel
+        run: make cpp-build
+
+      - name: Cache build and bazel_assets directories
+        uses: actions/cache@v3
+        with:
+          path: |
+            build
+            bazel_assets
+          key: ${{ runner.os }}-cpp-build-${{ hashFiles('**/CMakeLists.txt') }}-${{ hashFiles('**/*.cpp') }}
+          restore-keys: |
+            ${{ runner.os }}-cpp-build-${{ hashFiles('**/CMakeLists.txt') }}
+            ${{ runner.os }}-cpp-build
+
   cpp-tests:
     runs-on: ubuntu-22.04
     needs: build-bazel
@@ -57,9 +71,29 @@ jobs:
       - name: Run cpp tests
         run: make cpp-test
 
+  build-wheeler:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Build docker image
+        run: make wheeler-image
+
+      - name: Build Wheeler
+        run: make wheeler-build
+
+      - name: Upload wheeler artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheelers
+          path: wheelhouse/*
+
   wheel-test:
     runs-on: ubuntu-22.04
-    needs: build-bazel
+    needs:
+      - build-bazel
+      - build-wheeler
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v4
@@ -76,6 +110,26 @@ jobs:
         run: |-
           docker pull ghcr.io/${{ github.repository_owner }}/das-node-builder:${{ github.sha }} 
           docker tag ghcr.io/${{ github.repository_owner }}/das-node-builder:${{ github.sha }} das-node-builder:latest
+
+      - name: Cache build and bazel_assets directories
+        uses: actions/cache@v3
+        with:
+          path: |
+            build
+            bazel_assets
+          key: ${{ runner.os }}-cpp-build-${{ hashFiles('**/CMakeLists.txt') }}-${{ hashFiles('**/*.cpp') }}
+          restore-keys: |
+            ${{ runner.os }}-cpp-build-${{ hashFiles('**/CMakeLists.txt') }}
+            ${{ runner.os }}-cpp-build
+
+      - name: Download wheeler artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: wheelers
+          path: wheelhouse
+
+      - name: Install Python dependencies
+        run: pip install wheelhouse/*
 
       - name: Run python tests
         run: make wheeler-test
