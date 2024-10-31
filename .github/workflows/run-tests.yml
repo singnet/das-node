@@ -44,10 +44,9 @@ jobs:
             build
             bazel_assets
             docker/volumes/bazel_cache
-          key: ${{ runner.os }}-cpp-build-${{ hashFiles('**/CMakeLists.txt') }}-${{ hashFiles('**/*.cpp') }}
+          key: ${{ runner.os }}-cpp-build-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-cpp-build-${{ hashFiles('**/CMakeLists.txt') }}
-            ${{ runner.os }}-cpp-build
+            ${{ runner.os }}-cpp-build-${{ github.sha }}
 
   cpp-tests:
     runs-on: ubuntu-22.04
@@ -88,10 +87,9 @@ jobs:
           path: |
             build
             bazel_assets
-          key: ${{ runner.os }}-cpp-build-${{ hashFiles('**/CMakeLists.txt') }}-${{ hashFiles('**/*.cpp') }}
+          key: ${{ runner.os }}-cpp-build-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-cpp-build-${{ hashFiles('**/CMakeLists.txt') }}
-            ${{ runner.os }}-cpp-build
+            ${{ runner.os }}-cpp-build-${{ github.sha }}
 
       - name: Build wheeler
         run: make wheeler-build
@@ -130,10 +128,9 @@ jobs:
           path: |
             build
             bazel_assets
-          key: ${{ runner.os }}-cpp-build-${{ hashFiles('**/CMakeLists.txt') }}-${{ hashFiles('**/*.cpp') }}
+          key: ${{ runner.os }}-cpp-build-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-cpp-build-${{ hashFiles('**/CMakeLists.txt') }}
-            ${{ runner.os }}-cpp-build
+            ${{ runner.os }}-cpp-build-${{ github.sha }}
 
       - name: Download wheeler artifacts
         uses: actions/download-artifact@v4

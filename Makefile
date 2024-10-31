@@ -13,7 +13,7 @@ cpp-test:
 wheeler-image:
 	@./scripts/wheeler_image.sh
 
-wheeler-build: 
+wheeler-build:
 	@./scripts/wheeler_build.sh
 
 wheeler-test:
