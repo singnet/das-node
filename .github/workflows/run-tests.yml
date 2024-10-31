@@ -73,6 +73,7 @@ jobs:
 
   build-wheeler:
     runs-on: ubuntu-22.04
+    needs: build-bazel
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v4
@@ -80,7 +81,18 @@ jobs:
       - name: Build docker image
         run: make wheeler-image
 
-      - name: Build Wheeler
+      - name: Cache build and bazel_assets directories
+        uses: actions/cache@v3
+        with:
+          path: |
+            build
+            bazel_assets
+          key: ${{ runner.os }}-cpp-build-${{ hashFiles('**/CMakeLists.txt') }}-${{ hashFiles('**/*.cpp') }}
+          restore-keys: |
+            ${{ runner.os }}-cpp-build-${{ hashFiles('**/CMakeLists.txt') }}
+            ${{ runner.os }}-cpp-build
+
+      - name: Build wheeler
         run: make wheeler-build
 
       - name: Upload wheeler artifacts
