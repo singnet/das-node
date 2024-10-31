@@ -27,5 +27,4 @@ test-all: test-cpp test-python
 
 # Clean docker volumes and build directories
 clean:
-	@docker volume rm bazel_cache
-	@rm -rf src/bazel-* bazel_assets build dist
+	@rm -rf src/bazel-* bazel_assets build dist docker/volmes/bazel_cache

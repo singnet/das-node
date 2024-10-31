@@ -43,6 +43,7 @@ jobs:
           path: |
             build
             bazel_assets
+            docker/volumes/bazel_cache
           key: ${{ runner.os }}-cpp-build-${{ hashFiles('**/CMakeLists.txt') }}-${{ hashFiles('**/*.cpp') }}
           restore-keys: |
             ${{ runner.os }}-cpp-build-${{ hashFiles('**/CMakeLists.txt') }}
@@ -135,7 +136,7 @@ jobs:
             ${{ runner.os }}-cpp-build
 
       - name: Download wheeler artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: wheelers
           path: dist
