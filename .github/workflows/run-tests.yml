@@ -37,11 +37,15 @@ jobs:
       - name: Build bazel
         run: make cpp-build
 
+      - name: Give permissions
+        run: |-
+          sudo chmod 777 bazel_assets/ -R
+          sudo chmod 777 docker/volumes -R
+
       - name: Cache build and bazel_assets directories
         uses: actions/cache@v3
         with:
           path: |
-            ./build
             ./bazel_assets
             ./docker/volumes/bazel_cache
           key: ${{ runner.os }}-cpp-build-${{ github.sha }}
@@ -72,7 +76,6 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ./build
             ./bazel_assets
             ./docker/volumes/bazel_cache
           key: ${{ runner.os }}-cpp-build-${{ github.sha }}
@@ -93,7 +96,6 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ./build
             ./bazel_assets
             ./docker/volumes/bazel_cache
           key: ${{ runner.os }}-cpp-build-${{ github.sha }}
@@ -138,7 +140,6 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ./build
             ./bazel_assets
             ./docker/volumes/bazel_cache
           key: ${{ runner.os }}-cpp-build-${{ github.sha }}
