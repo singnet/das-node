@@ -84,8 +84,8 @@ jobs:
 
       - name: Set permissions for cached directories
         run: |
-          sudo chmod -R 777 ./bazel_assets
-          sudo chmod -R 777 ./docker/volumes/
+          sudo chown root:root -R ./bazel_assets
+          sudo chown root:root -R ./docker/volumes/
 
       - name: Run cpp tests
         run: make cpp-test
