@@ -37,10 +37,10 @@ jobs:
       - name: Build bazel
         run: make cpp-build
 
-      - name: Give permissions
-        run: |-
-          sudo chmod 777 bazel_assets/ -R
-          sudo chmod 777 docker/volumes -R
+      - name: Set permissions for cached directories
+        run: |
+          sudo chmod -R 777 ./bazel_assets
+          sudo chmod -R 777 ./docker/volumes/
 
       - name: Cache build and bazel_assets directories
         uses: actions/cache@v3
@@ -82,6 +82,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cpp-build-${{ github.sha }}
 
+      - name: Set permissions for cached directories
+        run: |
+          sudo chmod -R 777 ./bazel_assets
+          sudo chmod -R 777 ./docker/volumes/
+
       - name: Run cpp tests
         run: make cpp-test
 
@@ -101,6 +106,11 @@ jobs:
           key: ${{ runner.os }}-cpp-build-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-cpp-build-${{ github.sha }}
+
+      - name: Set permissions for cached directories
+        run: |
+          sudo chmod -R 777 ./bazel_assets
+          sudo chmod -R 777 ./docker/volumes/
 
       - name: Build docker image
         run: make wheeler-image
@@ -145,6 +155,11 @@ jobs:
           key: ${{ runner.os }}-cpp-build-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-cpp-build-${{ github.sha }}
+
+      - name: Set permissions for cached directories
+        run: |
+          sudo chmod -R 777 ./bazel_assets
+          sudo chmod -R 777 ./docker/volumes/
 
       - name: Download wheeler artifacts
         uses: actions/download-artifact@v4
