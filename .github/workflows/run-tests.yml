@@ -41,9 +41,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            build
-            bazel_assets
-            docker/volumes/bazel_cache
+            ./build
+            ./bazel_assets
+            ./docker/volumes/bazel_cache
           key: ${{ runner.os }}-cpp-build-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-cpp-build-${{ github.sha }}
@@ -68,6 +68,17 @@ jobs:
           docker pull ghcr.io/${{ github.repository_owner }}/das-node-builder:${{ github.sha }}
           docker tag ghcr.io/${{ github.repository_owner }}/das-node-builder:${{ github.sha }} das-node-builder:latest
 
+      - name: Cache build and bazel_assets directories
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./build
+            ./bazel_assets
+            ./docker/volumes/bazel_cache
+          key: ${{ runner.os }}-cpp-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cpp-build-${{ github.sha }}
+
       - name: Run cpp tests
         run: make cpp-test
 
@@ -78,18 +89,19 @@ jobs:
       - name: Checkout repository code
         uses: actions/checkout@v4
 
-      - name: Build docker image
-        run: make wheeler-image
-
       - name: Cache build and bazel_assets directories
         uses: actions/cache@v3
         with:
           path: |
-            build
-            bazel_assets
+            ./build
+            ./bazel_assets
+            ./docker/volumes/bazel_cache
           key: ${{ runner.os }}-cpp-build-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-cpp-build-${{ github.sha }}
+
+      - name: Build docker image
+        run: make wheeler-image
 
       - name: Build wheeler
         run: make wheeler-build
@@ -126,8 +138,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            build
-            bazel_assets
+            ./build
+            ./bazel_assets
+            ./docker/volumes/bazel_cache
           key: ${{ runner.os }}-cpp-build-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-cpp-build-${{ github.sha }}
