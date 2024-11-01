@@ -1,0 +1,174 @@
+---
+name: Run DAS Node tests
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - edited
+      - synchronize
+
+  workflow_dispatch:
+
+jobs:
+  build-bazel:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Build docker image
+        run: make cpp-image
+
+      - name: Login to Github Registry
+        if: success()
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image to repository
+        run: |-
+          docker tag das-node-builder:latest ghcr.io/${{ github.repository_owner }}/das-node-builder:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository_owner }}/das-node-builder:${{ github.sha }}
+
+      - name: Build bazel
+        run: make cpp-build
+
+      - name: Set permissions for cached directories
+        run: |
+          sudo chmod -R 777 ./bazel_assets
+          sudo chmod -R 777 ./docker/volumes/
+
+      - name: Cache build and bazel_assets directories
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./bazel_assets
+            ./docker/volumes/bazel_cache
+          key: ${{ runner.os }}-cpp-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cpp-build-${{ github.sha }}
+
+  cpp-tests:
+    runs-on: ubuntu-22.04
+    needs: build-bazel
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Login to Github Registry
+        if: success()
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull docker image from registry
+        run: |-
+          docker pull ghcr.io/${{ github.repository_owner }}/das-node-builder:${{ github.sha }}
+          docker tag ghcr.io/${{ github.repository_owner }}/das-node-builder:${{ github.sha }} das-node-builder:latest
+
+      - name: Cache build and bazel_assets directories
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./bazel_assets
+            ./docker/volumes/bazel_cache
+          key: ${{ runner.os }}-cpp-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cpp-build-${{ github.sha }}
+
+      - name: Set permissions for cached directories
+        run: |
+          sudo chown root:root -R ./bazel_assets
+          sudo chown root:root -R ./docker/volumes/
+
+      - name: Run cpp tests
+        run: make cpp-test
+
+  build-wheeler:
+    runs-on: ubuntu-22.04
+    needs: build-bazel
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Cache build and bazel_assets directories
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./bazel_assets
+            ./docker/volumes/bazel_cache
+          key: ${{ runner.os }}-cpp-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cpp-build-${{ github.sha }}
+
+      - name: Set permissions for cached directories
+        run: |
+          sudo chmod -R 777 ./bazel_assets
+          sudo chmod -R 777 ./docker/volumes/
+
+      - name: Build docker image
+        run: make wheeler-image
+
+      - name: Build wheeler
+        run: make wheeler-build
+
+      - name: Upload wheeler artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheelers
+          path: dist/*
+
+  wheel-test:
+    runs-on: ubuntu-22.04
+    needs:
+      - build-bazel
+      - build-wheeler
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Login to Github Registry
+        if: success()
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull docker image from registry
+        run: |-
+          docker pull ghcr.io/${{ github.repository_owner }}/das-node-builder:${{ github.sha }} 
+          docker tag ghcr.io/${{ github.repository_owner }}/das-node-builder:${{ github.sha }} das-node-builder:latest
+
+      - name: Cache build and bazel_assets directories
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./bazel_assets
+            ./docker/volumes/bazel_cache
+          key: ${{ runner.os }}-cpp-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cpp-build-${{ github.sha }}
+
+      - name: Set permissions for cached directories
+        run: |
+          sudo chmod -R 777 ./bazel_assets
+          sudo chmod -R 777 ./docker/volumes/
+
+      - name: Download wheeler artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: wheelers
+          path: dist
+
+      - name: Install Python dependencies
+        run: pip install dist/*.whl
+
+      - name: Run python tests
+        run: make wheeler-test

@@ -5,7 +5,7 @@ CONTAINER_NAME="das-node-build"
 docker run \
   --rm \
   --name=$CONTAINER_NAME \
-  --mount type=volume,source=bazel_cache,target=/root/.cache/bazel \
+  --volume ./docker/volumes/bazel_cache:/root/.cache/bazel \
   --volume .:/opt/hyperon_das_node \
   --workdir /opt/hyperon_das_node/src \
   das-node-builder \
