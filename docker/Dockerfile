@@ -10,36 +10,38 @@ ARG PROTO_DIR="${BASE_DIR}/proto"
 ARG BAZEL_DIR="${BASE_DIR}/bazel"
 ARG THIRDPARTY="${BASE_DIR}/3rd-party"
 
-RUN mkdir -p ${DAS_NODE_DIR} && mkdir -p ${DATA_DIR} && mkdir -p ${GRPC_DIR}\
-  && mkdir -p ${BAZEL_DIR} && mkdir -p ${PROTO_DIR} && mkdir -p ${THIRDPARTY}
+
+RUN mkdir -p ${DAS_NODE_DIR} ${DATA_DIR} ${GRPC_DIR} \ 
+  ${BAZEL_DIR} ${PROTO_DIR} ${THIRDPARTY}
 
 VOLUME ${DAS_NODE_DIR}
 
 RUN apt-get update &&\
   apt-get install -y git build-essential autoconf libtool pkg-config curl gcc \
-  protobuf-compiler libmbedcrypto7 python3 pip cmake python3 pip
+  protobuf-compiler libmbedcrypto7 python3 pip cmake python3 pip \
+  libpaho-mqtt-dev libpaho-mqttpp-dev
 
 RUN pip install --no-cache-dir nanobind==2.1.0
 
 RUN cd ${GRPC_DIR} &&\
-    git clone https://github.com/grpc/grpc &&\
-    cd grpc &&\
-    git submodule update --init
+  git clone https://github.com/grpc/grpc &&\
+  cd grpc &&\
+  git submodule update --init
 
 COPY assets/3rd-party.tgz ${THIRDPARTY}
 RUN --mount=type=cache,target=/root/.cache/bazel cd ${THIRDPARTY} &&\
-    tar xzvf 3rd-party.tgz &&\
-    rm -f 3rd-party.tgz &&\
-    mkdir -p ${DAS_NODE_DIR}}/src/3rd-party &&\
-    ln -s ${THIRDPARTY} ${DAS_NODE_DIR}}/src/3rd-party &&\
-    mv bazelisk ${BAZEL_DIR}
-    
+  tar xzvf 3rd-party.tgz &&\
+  rm -f 3rd-party.tgz &&\
+  mkdir -p ${DAS_NODE_DIR}}/src/3rd-party &&\
+  ln -s ${THIRDPARTY} ${DAS_NODE_DIR}}/src/3rd-party &&\
+  mv bazelisk ${BAZEL_DIR}
+
 ENV CPLUS_INCLUDE_PATH="/opt/3rd-party/mbedcrypto/include/"
 
 ENV CC=/usr/bin/gcc
 RUN ln -s ${BAZEL_DIR}/bazelisk /usr/bin/bazel
 RUN cd ${GRPC_DIR}/grpc &&\
-    ${BAZEL_DIR}/bazelisk build :all
+  ${BAZEL_DIR}/bazelisk build :all
 
 ADD https://raw.githubusercontent.com/singnet/das-query-engine/master/proto/common.proto ${PROTO_DIR}
 ADD https://raw.githubusercontent.com/singnet/das-query-engine/master/proto/echo.proto ${PROTO_DIR}
