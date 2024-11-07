@@ -14,7 +14,7 @@ class SimpleNode(AtomSpaceNode):
         super().__init__(
             node_id,
             LeadershipBrokerType.SINGLE_MASTER_SERVER,
-            MessageBrokerType.GRPC,
+            MessageBrokerType.MQTT,
         )
 
         self.is_server = is_server

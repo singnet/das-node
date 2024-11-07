@@ -9,26 +9,31 @@
 #include <thread>
 #include <vector>
 
-// MqttMessage structure to hold message payload and topic
+using namespace mqtt;
+using namespace std;
+
+namespace mqtt_client {
+
+// MQTTMessage structure to hold message payload and topic
 struct MqttMessage {
   std::string topic;
   std::string payload;
 
   MqttMessage(const std::string &t, const std::string &p)
-      : topic(t), payload(p){};
+      : topic(t), payload(p) {};
 };
 
 // MQTTClient class for handling both publishing and subscribing
-class MQTTClient : public virtual mqtt::callback {
+class MqttClient : public virtual mqtt::callback {
 public:
   // Constructor to initialize client with server address, client ID, topics,
   // QoS, and callback
-  MQTTClient(const std::string &server_address, const std::string &client_id,
+  MqttClient(const std::string &server_address, const std::string &client_id,
              const std::vector<std::string> &topics, const int qos,
              std::function<void(const MqttMessage &)> message_callback);
 
   // Destructor to clean up resources
-  ~MQTTClient();
+  ~MqttClient();
 
   // Start the client and its threads for publishing and subscribing
   void start();
@@ -76,4 +81,5 @@ private:
   void subscribe_loop();
 };
 
+} // namespace mqtt_client
 #endif // MQTT_CLIENT_H

@@ -12,7 +12,6 @@
 
 #include "MessageBroker.h"
 #include "Utils.h"
-#include "mqtt/client.h"
 
 using namespace atom_space_node;
 
@@ -38,8 +37,7 @@ MessageBroker::factory(MessageBrokerType instance_type,
     return shared_ptr<MessageBroker>(new SynchronousGRPC(host_node, node_id));
   }
   case MessageBrokerType::MQTT: {
-    return shared_ptr<MessageBroker>(
-        new SynchronousMQTT(host_node, node_id, "FIXME"));
+    return shared_ptr<MessageBroker>(new SynchronousMQTT(host_node, node_id));
   }
   default: {
     Utils::error("Invalid MessageBrokerType: " + to_string((int)instance_type));
@@ -98,10 +96,16 @@ SynchronousGRPC::~SynchronousGRPC() {
 }
 
 SynchronousMQTT::SynchronousMQTT(shared_ptr<MessageFactory> host_node,
-                                 const string &node_id,
-                                 const string &broker_address)
+                                 const string &node_id)
     : MessageBroker(host_node, node_id) {
-  // TODO: create a mqtt_client to
+
+    std::vector<std::string> topics = {"test/broadcast", "test/self"};
+
+    // Define a custom callback function
+
+    this->node_topic = "HyperonDasNode/" + this->node_id;
+
+    this->client = new mqtt_client::MqttClient("tcp://donaldduck.local:1883", "client_id_123", {this->node_topic, this->broadcast_topic}, 1, this->on_message_callback);
 }
 
 SynchronousMQTT::~SynchronousMQTT() {
@@ -469,7 +473,11 @@ SynchronousGRPC::execute_message(grpc::ServerContext *grpc_context,
 // SynchronousMQTT
 
 void SynchronousMQTT::join_network() {
-  std::cout << "SynchronousMQTT join_network" << std::endl;
+
+    this->client->start();
+
+    std::cout << "Client connected!" << std::endl;
+
 }
 
 void SynchronousMQTT::add_peer(const string &peer_id) {
@@ -479,13 +487,20 @@ void SynchronousMQTT::add_peer(const string &peer_id) {
 void SynchronousMQTT::send(const string &command, const vector<string> &args,
                            const string &recipient) {
   std::cout << "SynchronousMQTT Send" << std::endl;
+  this->client->send_message(mqtt_client::MqttMessage("HyperonDasNode/" + recipient, command));
 }
 
 void SynchronousMQTT::broadcast(const string &command,
                                 const vector<string> &args) {
   std::cout << "SynchronousMQTT Broadcast" << std::endl;
-  this->client.publish
+  this->client->send_message(mqtt_client::MqttMessage(this->broadcast_topic, command));
 }
+
+void SynchronousMQTT::on_message_callback(const mqtt_client::MqttMessage &msg) {
+
+    std::cout << "Custom Callback: Message received on topic '" << msg.topic 
+              << "' with payload: " << msg.payload << std::endl;
+};
 
 // -------------------------------------------------------------------------------------------------
 // Common utility classes

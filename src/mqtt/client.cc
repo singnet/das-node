@@ -1,6 +1,9 @@
 #include "client.h"
 
-MQTTClient::MQTTClient(
+
+using namespace mqtt_client;
+
+MqttClient::MqttClient(
     const std::string &server_address, const std::string &client_id,
     const std::vector<std::string> &topics, const int qos,
     std::function<void(const MqttMessage &)> message_callback)
@@ -9,9 +12,9 @@ MQTTClient::MQTTClient(
   client_.set_callback(*this);
 }
 
-MQTTClient::~MQTTClient() { stop(); }
+MqttClient::~MqttClient() { stop(); }
 
-void MQTTClient::start() {
+void MqttClient::start() {
   mqtt::connect_options connOpts;
   connOpts.set_clean_session(true);
 
@@ -24,14 +27,14 @@ void MQTTClient::start() {
     is_running_ = true;
 
     // Start separate threads for publishing and subscribing
-    pub_thread_ = std::thread(&MQTTClient::publish_loop, this);
-    sub_thread_ = std::thread(&MQTTClient::subscribe_loop, this);
+    pub_thread_ = std::thread(&MqttClient::publish_loop, this);
+    sub_thread_ = std::thread(&MqttClient::subscribe_loop, this);
   } catch (const mqtt::exception &exc) {
     std::cerr << "Error: " << exc.what() << std::endl;
   }
 }
 
-void MQTTClient::stop() {
+void MqttClient::stop() {
   if (is_running_) {
     is_running_ = false;
 
@@ -49,23 +52,23 @@ void MQTTClient::stop() {
   }
 }
 
-void MQTTClient::send_message(const MqttMessage msg) {
+void MqttClient::send_message(const MqttMessage msg) {
   std::lock_guard<std::mutex> lock(queue_mutex_);
   message_queue_.push_back(msg);
 }
 
-void MQTTClient::message_arrived(mqtt::const_message_ptr msg) {
+void MqttClient::message_arrived(mqtt::const_message_ptr msg) {
   // Call the user-defined callback function with the received message
   MqttMessage mqtt_msg(msg->get_topic(), msg->get_payload_str());
   message_callback_(mqtt_msg);
 }
 
-void MQTTClient::connection_lost(const std::string &cause) {
+void MqttClient::connection_lost(const std::string &cause) {
   std::cerr << "Connection lost: " << cause << std::endl;
   is_running_ = false;
 }
 
-void MQTTClient::publish_loop() {
+void MqttClient::publish_loop() {
   while (is_running_) {
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
@@ -86,7 +89,7 @@ void MQTTClient::publish_loop() {
   }
 }
 
-void MQTTClient::subscribe_loop() {
+void MqttClient::subscribe_loop() {
   try {
     for (const auto &topic : topics_) {
       client_.subscribe(topic, qos_)->wait();
@@ -99,30 +102,4 @@ void MQTTClient::subscribe_loop() {
   } catch (const mqtt::exception &exc) {
     std::cerr << "Subscribe error: " << exc.what() << std::endl;
   }
-}
-
-int main() {
-  // Define the server address, client ID, topics to subscribe to, and QoS
-  int qos = 1;
-  std::vector<std::string> topics = {"test/broadcast", "test/self"};
-
-  // Define a custom callback function
-  auto custom_callback = [](const MqttMessage &msg) {
-    std::cout << "Custom Callback: Message received on topic '" << msg.topic
-              << "' with payload: " << msg.payload << std::endl;
-  };
-
-  // Create the client and start it, passing the custom callback
-  MQTTClient client("tcp://donaldduck.local:1883", "client_id_123", topics, qos,
-                    custom_callback);
-  client.start();
-
-  // Send a message to a topic
-  client.send_message(MqttMessage("test/broadcast", "Hello, MQTT"));
-
-  // Run the client (it will keep running until stopped)
-  std::this_thread::sleep_for(std::chrono::seconds(10));
-
-  client.stop();
-  return 0;
 }
