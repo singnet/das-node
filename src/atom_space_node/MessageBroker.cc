@@ -99,13 +99,15 @@ SynchronousMQTT::SynchronousMQTT(shared_ptr<MessageFactory> host_node,
                                  const string &node_id)
     : MessageBroker(host_node, node_id) {
 
-    std::vector<std::string> topics = {"test/broadcast", "test/self"};
+  std::vector<std::string> topics = {"test/broadcast", "test/self"};
 
-    // Define a custom callback function
+  // Define a custom callback function
 
-    this->node_topic = "HyperonDasNode/" + this->node_id;
+  this->node_topic = "HyperonDasNode/" + this->node_id;
 
-    this->client = new mqtt_client::MqttClient("tcp://donaldduck.local:1883", "client_id_123", {this->node_topic, this->broadcast_topic}, 1, this->on_message_callback);
+  this->client = new mqtt_client::MqttClient(
+      "tcp://donaldduck.local:1883", "client_id_123",
+      {this->node_topic, this->broadcast_topic}, 1, this->on_message_callback);
 }
 
 SynchronousMQTT::~SynchronousMQTT() {
@@ -474,10 +476,9 @@ SynchronousGRPC::execute_message(grpc::ServerContext *grpc_context,
 
 void SynchronousMQTT::join_network() {
 
-    this->client->start();
+  this->client->start();
 
-    std::cout << "Client connected!" << std::endl;
-
+  std::cout << "Client connected!" << std::endl;
 }
 
 void SynchronousMQTT::add_peer(const string &peer_id) {
@@ -487,19 +488,21 @@ void SynchronousMQTT::add_peer(const string &peer_id) {
 void SynchronousMQTT::send(const string &command, const vector<string> &args,
                            const string &recipient) {
   std::cout << "SynchronousMQTT Send" << std::endl;
-  this->client->send_message(mqtt_client::MqttMessage("HyperonDasNode/" + recipient, command));
+  this->client->send_message(
+      mqtt_client::MqttMessage("HyperonDasNode/" + recipient, command));
 }
 
 void SynchronousMQTT::broadcast(const string &command,
                                 const vector<string> &args) {
   std::cout << "SynchronousMQTT Broadcast" << std::endl;
-  this->client->send_message(mqtt_client::MqttMessage(this->broadcast_topic, command));
+  this->client->send_message(
+      mqtt_client::MqttMessage(this->broadcast_topic, command));
 }
 
 void SynchronousMQTT::on_message_callback(const mqtt_client::MqttMessage &msg) {
 
-    std::cout << "Custom Callback: Message received on topic '" << msg.topic 
-              << "' with payload: " << msg.payload << std::endl;
+  std::cout << "Custom Callback: Message received on topic '" << msg.topic
+            << "' with payload: " << msg.payload << std::endl;
 };
 
 // -------------------------------------------------------------------------------------------------
