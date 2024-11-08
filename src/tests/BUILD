@@ -23,7 +23,7 @@ cc_test(
     ],
     deps = [
         "@com_github_google_googletest//:gtest_main",
-        "//atom_space_node:atom_space_node_lib",
+        "//distributed_algorithm_node:distributed_algorithm_node_lib",
     ],
     linkstatic = 1
 )
@@ -38,14 +38,14 @@ cc_test(
     ],
     deps = [
         "@com_github_google_googletest//:gtest_main",
-        "//atom_space_node:atom_space_node_lib",
+        "//distributed_algorithm_node:distributed_algorithm_node_lib",
     ],
     linkstatic = 1
 )
 
 cc_test(
-    name = "atom_space_node_test",
-    srcs = ["atom_space_node_test.cc"],
+    name = "distributed_algorithm_node_test",
+    srcs = ["distributed_algorithm_node_test.cc"],
     size = "medium",
     copts = [
       "-Iexternal/gtest/googletest/include",
@@ -53,7 +53,7 @@ cc_test(
     ],
     deps = [
         "@com_github_google_googletest//:gtest_main",
-        "//atom_space_node:atom_space_node_lib",
+        "//distributed_algorithm_node:distributed_algorithm_node_lib",
     ],
     linkstatic = 1
 )

@@ -1,8 +1,8 @@
-#include "AtomSpaceNode.h"
+#include "DistributedAlgorithmNode.h"
 #include <iostream>
 #include <string>
 
-using namespace atom_space_node;
+using namespace distributed_algorithm_node;
 
 int main(int argc, char* argv[]) {
   string node_id = "node1";

@@ -1,26 +1,31 @@
-#ifndef _ATOM_SPACE_NODE_MESSAGEBROKER_H
-#define _ATOM_SPACE_NODE_MESSAGEBROKER_H
+#ifndef _DISTRIBUTED_ALGORITHM_NODE_MESSAGEBROKER_H
+#define _DISTRIBUTED_ALGORITHM_NODE_MESSAGEBROKER_H
 
 #include <vector>
 #include <unordered_set>
 #include <string>
 #include <thread>
 #include <mutex>
+
+// TODO: Once das-proto is updated, update atom_space_node to distributed_algorithm_node
+
 #include "atom_space_node.grpc.pb.h"
+// #include "distributed_algorithm_node.grpc.pb.h"
+
 #include "Message.h"
 #include "RequestQueue.h"
 
 using namespace std;
 using namespace commons;
 
-namespace atom_space_node {
+namespace distributed_algorithm_node {
 
 enum class MessageBrokerType {
     RAM,
     GRPC
 };
 
-class AtomSpaceNode;
+class DistributedAlgorithmNode;
 
 // -------------------------------------------------------------------------------------------------
 // Abstract superclass
@@ -28,8 +33,8 @@ class AtomSpaceNode;
 /**
  * Implements the communication layer used by nodes to exchange Messages.
  *
- * This is the abstract class defining the API used by AtomSpaceNodes to exchange messages.
- * Users of the AtomSpaceNode module aren't supposed to interact with MessageBroker directly.
+ * This is the abstract class defining the API used by DistributedAlgorithmNodes to exchange messages.
+ * Users of the DistributedAlgorithmNode module aren't supposed to interact with MessageBroker directly.
  */
 class MessageBroker {
 
@@ -41,7 +46,7 @@ public:
      * @param instance_type Defines which subclass should be used to instantiate the MessageBroker
      * @param host_node The object responsible for building Message objects. Typically, it's The
      * node this MessageBroker belongs to.
-     * @param node_id The ID of the AtomSpaceNode this MessageBroker belongs to.
+     * @param node_id The ID of the DistributedAlgorithmNode this MessageBroker belongs to.
      * @return An instance of the selected MessageBroker subclass.
      */
     static shared_ptr<MessageBroker> factory(
@@ -54,7 +59,7 @@ public:
      *
      * @param host_node The object responsible for building Message objects. Typically, it's The
      * node this MessageBroker belongs to.
-     * @param node_id The ID of the AtomSpaceNode this MessageBroker belongs to.
+     * @param node_id The ID of the DistributedAlgorithmNode this MessageBroker belongs to.
      */
     MessageBroker(shared_ptr<MessageFactory> host_node, const string &node_id);
 
@@ -247,6 +252,8 @@ private:
  * answer is supposed to be implemented as a separate Message going back from the target node to
  * the node that originated the request.
  */
+// TODO: Once das-proto is updated, update atom_space_node to distributed_algorithm_node
+// class SynchronousGRPC : public MessageBroker, public dasproto::DistributedAlgorithmNode::Service {
 class SynchronousGRPC : public MessageBroker, public dasproto::AtomSpaceNode::Service {
 
 public:
@@ -256,7 +263,7 @@ public:
      *
      * @param host_node The object responsible for building Message objects. Typically, it's The
      * node this MessageBroker belongs to.
-     * @param node_id The ID of the AtomSpaceNode this MessageBroker belongs to.
+     * @param node_id The ID of the DistributedAlgorithmNode this MessageBroker belongs to.
      */
     SynchronousGRPC(shared_ptr<MessageFactory> host_node, const string &node_id);
 
@@ -368,7 +375,7 @@ class CommandLinePackage {
         unordered_set<string> visited;
 };
 
-} // namespace atom_space_node
+} // namespace distributed_algorithm_node
 
-#endif // _ATOM_SPACE_NODE_MESSAGEBROKER_H
+#endif // _DISTRIBUTED_ALGORITHM_NODE_MESSAGEBROKER_H
 

@@ -4,7 +4,7 @@
 #include "gtest/gtest.h"
 #include "LeadershipBroker.h"
 
-using namespace atom_space_node;
+using namespace distributed_algorithm_node;
 
 TEST(LeadershipBroker, basics) {
 
