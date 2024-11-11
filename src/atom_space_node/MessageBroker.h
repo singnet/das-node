@@ -2,6 +2,7 @@
 #define _ATOM_SPACE_NODE_MESSAGEBROKER_H
 
 #include "Message.h"
+#include "MqttClient.h"
 #include "RequestQueue.h"
 #include "atom_space_node.grpc.pb.h"
 #include <mutex>
@@ -9,10 +10,10 @@
 #include <thread>
 #include <unordered_set>
 #include <vector>
-#include "mqtt/client.h"
 
 using namespace std;
 using namespace commons;
+using namespace mqtt_client;
 
 namespace atom_space_node {
 
@@ -371,7 +372,6 @@ public:
 
   // Public MessageBroker abstract API
 
-
   virtual void add_peer(const string &peer_id);
 
   virtual void join_network();
@@ -381,18 +381,15 @@ public:
   virtual void send(const string &command, const vector<string> &args,
                     const string &recipient);
 
-  static void on_message_callback(const mqtt_client::MqttMessage &msg);
+  static void on_message_callback(const MqttMessage &msg);
 
 private:
-
-  static string node_topic;
+  string node_topic;
   const string broadcast_topic = "HyperonDasNode/broadcast";
   static unsigned int MESSASGE_THREAD_COUNT;
   static unordered_map<string, RequestQueue *> NODE_QUEUE;
   static mutex NODE_QUEUE_MUTES;
-  static mqtt_client::MqttClient *client;
-
-
+  MqttClient *client;
 
   vector<thread *> inbox_threads;
   RequestQueue incoming_messages; // Thread safe container

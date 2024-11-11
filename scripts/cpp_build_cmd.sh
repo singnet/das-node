@@ -6,8 +6,8 @@ output="../bazel_assets"
 
 ##### Workaround to build nanobind with CMake ######
 # removes folder if exists
-if [ -d "$output" ]; then 
-  rm -rf $output 
+if [ -d "$output" ]; then
+  rm -rf $output
 fi
 
 # Recreates folders
@@ -27,6 +27,8 @@ cp -r bazel-src/external/com_github_grpc_grpc/include/grpc $output/
 cp -r bazel-src/external/com_github_grpc_grpc/include/grpcpp/ $output/
 cp -r bazel-src/external/com_google_absl/absl/ $output/
 cp -r bazel-src/external/com_google_protobuf/src/google/ $output/
+# cp -r bazel-bin/mqtt $output/
+# cp /usr/include/mqtt/async_client.h $output/mqtt
 cp bazel-bin/external/com_github_singnet_das_proto/atom_space_node.grpc.pb.h $output/
 cp bazel-bin/external/com_github_singnet_das_proto/atom_space_node.pb.h $output/
 cp bazel-bin/external/com_github_singnet_das_proto/common.pb.h $output/

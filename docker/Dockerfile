@@ -18,8 +18,7 @@ VOLUME ${DAS_NODE_DIR}
 
 RUN apt-get update &&\
   apt-get install -y git build-essential autoconf libtool pkg-config curl gcc \
-  protobuf-compiler libmbedcrypto7 python3 pip cmake python3 pip \
-  libpaho-mqtt-dev libpaho-mqttpp-dev
+  protobuf-compiler libmbedcrypto7 python3 pip cmake make python3 pip libssl-dev
 
 RUN pip install --no-cache-dir nanobind==2.1.0
 
@@ -35,6 +34,21 @@ RUN --mount=type=cache,target=/root/.cache/bazel cd ${THIRDPARTY} &&\
   mkdir -p ${DAS_NODE_DIR}}/src/3rd-party &&\
   ln -s ${THIRDPARTY} ${DAS_NODE_DIR}}/src/3rd-party &&\
   mv bazelisk ${BAZEL_DIR}
+
+COPY deps/* ${THIRDPARTY}
+RUN cd ${TMP_DIR} \
+  && tar -xzf ${THIRDPARTY}/paho.mqtt.c.tar.gz \
+  && cd paho.mqtt.c-1.3.9 \
+  && cmake -Bbuild -H. -DPAHO_ENABLE_TESTING=OFF -DPAHO_WITH_SSL=ON  -DPAHO_HIGH_PERFORMANCE=ON -DPAHO_BUILD_STATIC=ON \
+  && cmake --build build/ --target install
+ 
+
+RUN cd ${TMP_DIR} \
+  && tar -xzf ${THIRDPARTY}/paho.mqtt.cpp.tar.gz \
+  && cd paho.mqtt.cpp-1.2.0/ \
+  && cmake -Bbuild -H. -DPAHO_WITH_MQTT_C=ON -DPAHO_BUILD_EXAMPLES=OFF \
+    -DPAHO_WITH_SLL=TRUE -DPAHO_BUILD_STATIC=ON \
+  && cmake --build build/ --target install
 
 ENV CPLUS_INCLUDE_PATH="/opt/3rd-party/mbedcrypto/include/"
 
