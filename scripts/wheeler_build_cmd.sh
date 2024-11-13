@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # This script is used to build a wheel for the current package.
+set -euo pipefail
 
 TMP_DEST_DIR="tmp_dist"
 DEST_DIR="dist"

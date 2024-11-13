@@ -21,6 +21,8 @@ struct MqttMessage {
 
   MqttMessage(const std::string &t, const std::string &p)
       : topic(t), payload(p) {};
+
+  bool is_broadcast() { return topic == "HyperonDasNode/broadcast"; }
 };
 
 // MQTTClient class for handling both publishing and subscribing

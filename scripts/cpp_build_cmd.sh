@@ -1,8 +1,10 @@
 #!/bin/bash
 
+set -euo pipefail
+
 echo "===================================================================================================="
 output="../bazel_assets"
-/opt/bazel/bazelisk build --jobs 16 --noenable_bzlmod //:hyperon_das_node
+bazel build --jobs 16 --noenable_bzlmod //:hyperon_das_node
 
 ##### Workaround to build nanobind with CMake ######
 # removes folder if exists
@@ -27,8 +29,7 @@ cp -r bazel-src/external/com_github_grpc_grpc/include/grpc $output/
 cp -r bazel-src/external/com_github_grpc_grpc/include/grpcpp/ $output/
 cp -r bazel-src/external/com_google_absl/absl/ $output/
 cp -r bazel-src/external/com_google_protobuf/src/google/ $output/
-# cp -r bazel-bin/mqtt $output/
-# cp /usr/include/mqtt/async_client.h $output/mqtt
+cp $(find /usr/local/lib -name "*paho-mqtt*.a") $output
 cp bazel-bin/external/com_github_singnet_das_proto/atom_space_node.grpc.pb.h $output/
 cp bazel-bin/external/com_github_singnet_das_proto/atom_space_node.pb.h $output/
 cp bazel-bin/external/com_github_singnet_das_proto/common.pb.h $output/

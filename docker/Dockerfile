@@ -10,6 +10,8 @@ ARG PROTO_DIR="${BASE_DIR}/proto"
 ARG BAZEL_DIR="${BASE_DIR}/bazel"
 ARG THIRDPARTY="${BASE_DIR}/3rd-party"
 
+ENV CPLUS_INCLUDE_PATH="/opt/3rd-party/mbedcrypto/include/"
+ENV CC=/usr/bin/gcc
 
 RUN mkdir -p ${DAS_NODE_DIR} ${DATA_DIR} ${GRPC_DIR} \ 
   ${BAZEL_DIR} ${PROTO_DIR} ${THIRDPARTY}
@@ -17,48 +19,39 @@ RUN mkdir -p ${DAS_NODE_DIR} ${DATA_DIR} ${GRPC_DIR} \
 VOLUME ${DAS_NODE_DIR}
 
 RUN apt-get update &&\
-  apt-get install -y git build-essential autoconf libtool pkg-config curl gcc \
-  protobuf-compiler libmbedcrypto7 python3 pip cmake make python3 pip libssl-dev
+  apt-get install -y git build-essential autoconf libtool pkg-config curl gcc g++ \
+  protobuf-compiler libmbedcrypto7 python3 pip cmake make python3 pip libssl-dev unzip
 
 RUN pip install --no-cache-dir nanobind==2.1.0
-
-RUN cd ${GRPC_DIR} &&\
-  git clone https://github.com/grpc/grpc &&\
-  cd grpc &&\
-  git submodule update --init
 
 COPY assets/3rd-party.tgz ${THIRDPARTY}
 RUN --mount=type=cache,target=/root/.cache/bazel cd ${THIRDPARTY} &&\
   tar xzvf 3rd-party.tgz &&\
   rm -f 3rd-party.tgz &&\
-  mkdir -p ${DAS_NODE_DIR}}/src/3rd-party &&\
-  ln -s ${THIRDPARTY} ${DAS_NODE_DIR}}/src/3rd-party &&\
-  mv bazelisk ${BAZEL_DIR}
+  mkdir -p ${DAS_NODE_DIR}/src/3rd-party &&\
+  ln -s ${THIRDPARTY} ${DAS_NODE_DIR}/src/3rd-party &&\
+  # mv bazelisk ${BAZEL_DIR}
 
-COPY deps/* ${THIRDPARTY}
-RUN cd ${TMP_DIR} \
-  && tar -xzf ${THIRDPARTY}/paho.mqtt.c.tar.gz \
-  && cd paho.mqtt.c-1.3.9 \
-  && cmake -Bbuild -H. -DPAHO_ENABLE_TESTING=OFF -DPAHO_WITH_SSL=ON  -DPAHO_HIGH_PERFORMANCE=ON -DPAHO_BUILD_STATIC=ON \
+# ADD https://raw.githubusercontent.com/singnet/das-query-engine/master/proto/common.proto ${PROTO_DIR}
+# ADD https://raw.githubusercontent.com/singnet/das-query-engine/master/proto/echo.proto ${PROTO_DIR}
+
+WORKDIR ${TMP_DIR}
+
+COPY deps/* .
+
+RUN chmod +x bazel-7.4.1-installer-linux-x86_64.sh \
+  && ./bazel-7.4.1-installer-linux-x86_64.sh
+
+RUN tar -xzf paho.mqtt.c.tar.gz \
+  && tar -xzf paho.mqtt.cpp.tar.gz
+
+WORKDIR ${TMP_DIR}/paho.mqtt.c-1.3.9
+RUN cmake -Bbuild -H. -DPAHO_ENABLE_TESTING=OFF -DPAHO_WITH_SSL=OFF  -DPAHO_HIGH_PERFORMANCE=ON -DPAHO_BUILD_STATIC=ON \
   && cmake --build build/ --target install
- 
 
-RUN cd ${TMP_DIR} \
-  && tar -xzf ${THIRDPARTY}/paho.mqtt.cpp.tar.gz \
-  && cd paho.mqtt.cpp-1.2.0/ \
-  && cmake -Bbuild -H. -DPAHO_WITH_MQTT_C=ON -DPAHO_BUILD_EXAMPLES=OFF \
-    -DPAHO_WITH_SLL=TRUE -DPAHO_BUILD_STATIC=ON \
+WORKDIR ${TMP_DIR}/paho.mqtt.cpp-1.2.0
+RUN cmake -Bbuild -H. -DPAHO_WITH_MQTT_C=ON -DPAHO_BUILD_EXAMPLES=OFF -DPAHO_WITH_SSL=FALSE -DPAHO_BUILD_STATIC=ON \
   && cmake --build build/ --target install
-
-ENV CPLUS_INCLUDE_PATH="/opt/3rd-party/mbedcrypto/include/"
-
-ENV CC=/usr/bin/gcc
-RUN ln -s ${BAZEL_DIR}/bazelisk /usr/bin/bazel
-RUN cd ${GRPC_DIR}/grpc &&\
-  ${BAZEL_DIR}/bazelisk build :all
-
-ADD https://raw.githubusercontent.com/singnet/das-query-engine/master/proto/common.proto ${PROTO_DIR}
-ADD https://raw.githubusercontent.com/singnet/das-query-engine/master/proto/echo.proto ${PROTO_DIR}
 
 WORKDIR "${DAS_NODE_DIR}"
 

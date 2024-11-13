@@ -89,8 +89,9 @@ target_link_libraries(
   ${EXTENSION_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets/libinternal.a
     ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets/libexternal.a
-    # ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets/libenvoy_api.a
-
+    ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets/libpaho-mqtt3a.a
+    ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets/libpaho-mqtt3c.a
+    ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets/libpaho-mqttpp3.a
 )
 
 # Install directive for scikit-build-core

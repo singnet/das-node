@@ -363,12 +363,12 @@ private:
 
 /**
  **/
-class SynchronousMQTT : public MessageBroker {
+class AsynchronousMQTT : public MessageBroker {
 
 public:
-  SynchronousMQTT(shared_ptr<MessageFactory> host_node, const string &node_id);
+  AsynchronousMQTT(shared_ptr<MessageFactory> host_node, const string &node_id);
 
-  ~SynchronousMQTT();
+  ~AsynchronousMQTT();
 
   // Public MessageBroker abstract API
 
@@ -381,18 +381,25 @@ public:
   virtual void send(const string &command, const vector<string> &args,
                     const string &recipient);
 
-  static void on_message_callback(const MqttMessage &msg);
+  void on_message_callback(const MqttMessage &msg);
 
 private:
   string node_topic;
+
   const string broadcast_topic = "HyperonDasNode/broadcast";
+  const string payload_separator = "\t";
+
+  const string get_msg_payload(const string &command, const vector<string> &args);
+  static void parse_id(const string &id, string &broker_address, string &node_id);
   static unsigned int MESSASGE_THREAD_COUNT;
   static unordered_map<string, RequestQueue *> NODE_QUEUE;
   static mutex NODE_QUEUE_MUTES;
+
   MqttClient *client;
 
   vector<thread *> inbox_threads;
   RequestQueue incoming_messages; // Thread safe container
+  bool process_request();
 
   void inbox_thread_method();
 };

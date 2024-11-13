@@ -37,7 +37,7 @@ MessageBroker::factory(MessageBrokerType instance_type,
     return shared_ptr<MessageBroker>(new SynchronousGRPC(host_node, node_id));
   }
   case MessageBrokerType::MQTT: {
-    return shared_ptr<MessageBroker>(new SynchronousMQTT(host_node, node_id));
+    return shared_ptr<MessageBroker>(new AsynchronousMQTT(host_node, node_id));
   }
   default: {
     Utils::error("Invalid MessageBrokerType: " + to_string((int)instance_type));
@@ -95,23 +95,35 @@ SynchronousGRPC::~SynchronousGRPC() {
   }
 }
 
-SynchronousMQTT::SynchronousMQTT(shared_ptr<MessageFactory> host_node,
-                                 const string &node_id)
+AsynchronousMQTT::AsynchronousMQTT(shared_ptr<MessageFactory> host_node,
+                                   const string &node_id)
     : MessageBroker(host_node, node_id) {
 
-  std::vector<std::string> topics = {"test/broadcast", "test/self"};
-
   // Define a custom callback function
+  string broker_address;
+  string _node_id;
+  this->parse_id(node_id, broker_address, _node_id);
+  this->node_id = _node_id;
 
   this->node_topic = "HyperonDasNode/" + this->node_id;
 
-  this->client = new MqttClient("tcp://donaldduck.local:1883", "client_id_123",
-                                {this->node_topic, this->broadcast_topic}, 1,
-                                this->on_message_callback);
+  cout << "broker_address: " << broker_address << endl;
+  cout << "node_topic: " << this->node_topic << endl;
+
+  this->client =
+      new MqttClient(broker_address, this->node_id,
+                     {this->node_topic, this->broadcast_topic}, 1,
+                     std::bind(&AsynchronousMQTT::on_message_callback, this,
+                               std::placeholders::_1));
 }
 
-SynchronousMQTT::~SynchronousMQTT() {
-  // TODO: destruct the mqtt_client
+AsynchronousMQTT::~AsynchronousMQTT() {
+  if (this->joined_network) {
+    for (auto thread : inbox_threads) {
+      thread->join();
+    }
+    this->client->stop();
+  }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -243,6 +255,54 @@ bool SynchronousGRPC::process_request() {
 void SynchronousGRPC::inbox_thread_method() {
   bool stop_flag = false;
   set_inbox_setup_finished();
+  do {
+    if (!this->process_request()) {
+      if (this->is_shutting_down()) {
+        stop_flag = true;
+      } else {
+        Utils::sleep();
+      }
+    }
+  } while (!stop_flag);
+}
+
+bool AsynchronousMQTT::process_request() {
+
+  void *request = this->incoming_messages.dequeue();
+  if (request == NULL) {
+    return false;
+  }
+
+  MqttMessage *message_data = (MqttMessage *)request;
+
+  stringstream ss(message_data->payload);
+  string segment = "";
+  string sender = "";
+  string command = "";
+  vector<string> args = {};
+
+  while (getline(ss, segment, '\t')) {
+    if (sender == "") {
+      sender = segment;
+    } else if (command == "") {
+      command = segment;
+    } else {
+      args.push_back(segment);
+    }
+  }
+
+  if (sender == this->node_id) {
+    // In case of a broadcast, we will receive our own message, do not process
+    // it
+    return false;
+  }
+
+  return true;
+}
+
+void AsynchronousMQTT::inbox_thread_method() {
+  cout << "Starting inbox thread." << endl;
+  bool stop_flag = false;
   do {
     if (!this->process_request()) {
       if (this->is_shutting_down()) {
@@ -472,37 +532,65 @@ SynchronousGRPC::execute_message(grpc::ServerContext *grpc_context,
 }
 
 // -------------------------------------------------------------------------------------------------
-// SynchronousMQTT
+// AsynchronousMQTT
 
-void SynchronousMQTT::join_network() {
-
+void AsynchronousMQTT::join_network() {
+  //TODO: try catch this:
   this->client->start();
+  cout << "Thread count: " << this-> inbox_threads << endl;
+  for (auto inbox_thread : this->inbox_threads) {
+    new thread(&AsynchronousMQTT::inbox_thread_method, this);
+  }
 
-  std::cout << "Client connected!" << std::endl;
+  this->joined_network = true;
 }
 
-void SynchronousMQTT::add_peer(const string &peer_id) {
+void AsynchronousMQTT::add_peer(const string &peer_id) {
   MessageBroker::add_peer(peer_id);
 }
 
-void SynchronousMQTT::send(const string &command, const vector<string> &args,
-                           const string &recipient) {
-  std::cout << "SynchronousMQTT Send" << std::endl;
+const string AsynchronousMQTT::get_msg_payload(const string &command,
+                                               const vector<string> &args) {
+  // TODO: Documnet sender \t command \t args;
+  // TODO replace \t with a class constant
+
+  string payload = this->node_id + this->payload_separator + command;
+  for (auto arg : args) {
+    payload += this->payload_separator + arg;
+  }
+  return payload;
+}
+
+void AsynchronousMQTT::send(const string &command, const vector<string> &args,
+                            const string &recipient) {
+
+  const string payload = this->get_msg_payload(command, args);
   this->client->send_message(
-      MqttMessage("HyperonDasNode/" + recipient, command));
+      MqttMessage("HyperonDasNode/" + recipient, payload));
 }
 
-void SynchronousMQTT::broadcast(const string &command,
-                                const vector<string> &args) {
-  std::cout << "SynchronousMQTT Broadcast" << std::endl;
-  this->client->send_message(MqttMessage(this->broadcast_topic, command));
+void AsynchronousMQTT::broadcast(const string &command,
+                                 const vector<string> &args) {
+
+  const string payload = this->get_msg_payload(command, args);
+  this->client->send_message(MqttMessage(this->broadcast_topic, payload));
 }
 
-void SynchronousMQTT::on_message_callback(const MqttMessage &msg) {
-
-  std::cout << "Custom Callback: Message received on topic '" << msg.topic
-            << "' with payload: " << msg.payload << std::endl;
+void AsynchronousMQTT::on_message_callback(const MqttMessage &msg) {
+  this->incoming_messages.enqueue((void *)new MqttMessage(msg));
 };
+
+void AsynchronousMQTT::parse_id(const std::string &id, std::string &broker_addr, std::string &node_id) {
+  // Find the first '/' after "mqtt://url.domain:port"
+  std::size_t pos = id.find('/', id.find("://") + 3); // Start after "://"
+  if (pos != std::string::npos) {
+    broker_addr = id.substr(0, pos);     // Extract the URL part up to the first `/`
+    node_id = id.substr(pos + 1); // Extract the rest as `node_id`
+  } else {
+    broker_addr = id; // If no '/' found, treat the entire input as the URL
+    node_id = ""; // Set `node_id` as empty
+  }
+}
 
 // -------------------------------------------------------------------------------------------------
 // Common utility classes

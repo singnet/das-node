@@ -7,5 +7,5 @@ cc_library(
     includes = ["."],
     alwayslink = 1,
     linkstatic = 1,
-    linkopts = [ "-L/usr/local/lib -lpaho-mqtt3as -lpaho-mqttpp3 -pthread"],
+    linkopts = [ "-L/usr/local/lib -lpaho-mqtt3a -lpaho-mqtt3c -lpaho-mqttpp3 -pthread"],
 )
