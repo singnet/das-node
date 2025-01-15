@@ -7,6 +7,7 @@ cc_library(
     deps = [
         "//commons:commons_lib",
         "//distributed_algorithm_node:distributed_algorithm_node_lib",
+        "//mqtt:mqtt_client_lib",
         "@com_github_grpc_grpc//:grpc++",
         "@com_github_grpc_grpc//:grpc++_reflection",
         "@com_github_singnet_das_proto//:atom_space_node_cc_grpc",

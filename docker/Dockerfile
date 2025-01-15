@@ -5,46 +5,50 @@ ARG TMP_DIR="/tmp"
 
 ARG DAS_NODE_DIR="${BASE_DIR}/hyperon_das_node"
 ARG DATA_DIR="${BASE_DIR}/data"
-ARG GRPC_DIR="${BASE_DIR}/grpc"
 ARG PROTO_DIR="${BASE_DIR}/proto"
 ARG BAZEL_DIR="${BASE_DIR}/bazel"
 ARG THIRDPARTY="${BASE_DIR}/3rd-party"
 
-RUN mkdir -p ${DAS_NODE_DIR} && mkdir -p ${DATA_DIR} && mkdir -p ${GRPC_DIR}\
-  && mkdir -p ${BAZEL_DIR} && mkdir -p ${PROTO_DIR} && mkdir -p ${THIRDPARTY}
+ENV CPLUS_INCLUDE_PATH="/opt/3rd-party/mbedcrypto/include/"
+ENV CC=/usr/bin/gcc
+
+RUN mkdir -p ${DAS_NODE_DIR} ${DATA_DIR} \
+  ${BAZEL_DIR} ${PROTO_DIR} ${THIRDPARTY}
 
 VOLUME ${DAS_NODE_DIR}
 
 RUN apt-get update &&\
-  apt-get install -y git build-essential autoconf libtool pkg-config curl gcc \
-  protobuf-compiler libmbedcrypto7 python3 pip cmake python3 pip
+  apt-get install -y git build-essential autoconf libtool pkg-config curl gcc g++ \
+  protobuf-compiler libmbedcrypto7 python3 pip cmake make python3 pip libssl-dev unzip
 
 RUN pip install --no-cache-dir nanobind==2.1.0
 
-RUN cd ${GRPC_DIR} &&\
-    git clone https://github.com/grpc/grpc &&\
-    cd grpc &&\
-    git submodule update --init
+WORKDIR ${THIRDPARTY}
+COPY assets/3rd-party.tgz .
+RUN --mount=type=cache,target=/root/.cache/bazel \
+  tar xzvf 3rd-party.tgz &&\
+  rm -f 3rd-party.tgz &&\
+  mkdir -p ${DAS_NODE_DIR}/src/3rd-party &&\
+  ln -s ${THIRDPARTY} ${DAS_NODE_DIR}/src/3rd-party
 
-COPY assets/3rd-party.tgz ${THIRDPARTY}
-RUN --mount=type=cache,target=/root/.cache/bazel cd ${THIRDPARTY} &&\
-    tar xzvf 3rd-party.tgz &&\
-    rm -f 3rd-party.tgz &&\
-    mkdir -p ${DAS_NODE_DIR}}/src/3rd-party &&\
-    ln -s ${THIRDPARTY} ${DAS_NODE_DIR}}/src/3rd-party &&\
-    mv bazelisk ${BAZEL_DIR}
-    
-ENV CPLUS_INCLUDE_PATH="/opt/3rd-party/mbedcrypto/include/"
+WORKDIR ${TMP_DIR}
 
-ENV CC=/usr/bin/gcc
-RUN ln -s ${BAZEL_DIR}/bazelisk /usr/bin/bazel
-RUN cd ${GRPC_DIR}/grpc &&\
-    ${BAZEL_DIR}/bazelisk build :all
+COPY deps/* .
 
-ADD https://raw.githubusercontent.com/singnet/das-query-engine/master/proto/common.proto ${PROTO_DIR}
-ADD https://raw.githubusercontent.com/singnet/das-query-engine/master/proto/echo.proto ${PROTO_DIR}
+RUN chmod +x bazel-7.4.1-installer-linux-x86_64.sh \
+  && ./bazel-7.4.1-installer-linux-x86_64.sh
+
+RUN tar -xzf paho.mqtt.c.tar.gz \
+  && tar -xzf paho.mqtt.cpp.tar.gz
+
+WORKDIR ${TMP_DIR}/paho.mqtt.c-1.3.9
+RUN cmake -Bbuild -H. -DPAHO_ENABLE_TESTING=OFF -DPAHO_WITH_SSL=OFF  -DPAHO_HIGH_PERFORMANCE=ON -DPAHO_BUILD_STATIC=ON \
+  && cmake --build build/ --target install
+
+WORKDIR ${TMP_DIR}/paho.mqtt.cpp-1.2.0
+RUN cmake -Bbuild -H. -DPAHO_WITH_MQTT_C=ON -DPAHO_BUILD_EXAMPLES=OFF -DPAHO_WITH_SSL=FALSE -DPAHO_BUILD_STATIC=ON \
+  && cmake --build build/ --target install
 
 WORKDIR "${DAS_NODE_DIR}"
 
-#COPY source code and relevant info
 COPY . .

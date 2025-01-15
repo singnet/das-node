@@ -164,7 +164,7 @@ TEST(DistributedAlgorithmNode, communication) {
     TestNode *client1;
     TestNode *client2;
 
-    for (auto messaging_type: {MessageBrokerType::RAM , MessageBrokerType::GRPC}) {
+    for (auto messaging_type: {MessageBrokerType::RAM , MessageBrokerType::GRPC, MessageBrokerType::MQTT}) {
 
         server = new TestNode(
             server_id,
@@ -228,3 +228,4 @@ TEST(DistributedAlgorithmNode, communication) {
         Utils::sleep(1000);
     }
 }
+
