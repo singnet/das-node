@@ -1,8 +1,12 @@
-#!/bin/bash
+#!/bin/bash -x
 
 echo "===================================================================================================="
 output="../bazel_assets"
-/opt/bazel/bazelisk build --jobs 16 --noenable_bzlmod //:hyperon_das_node
+(( JOBS=$(nproc)/2 ))
+
+/opt/bazel/bazelisk build --jobs ${JOBS} //:hyperon_das_node
+
+[ "${?}" != "0" ] && exit 1
 
 ##### Workaround to build nanobind with CMake ######
 # removes folder if exists
@@ -23,16 +27,15 @@ ar rcs $output/libinternal.a \
   $(find bazel-bin/ -not -path 'bazel-bin/external/*' -iname "*o" -o -iname "*.lo" -o -iname "*.a")
 
 # Copy files
-cp -r bazel-src/external/com_github_grpc_grpc/include/grpc $output/
-cp -r bazel-src/external/com_github_grpc_grpc/include/grpcpp/ $output/
-cp -r bazel-src/external/com_google_absl/absl/ $output/
-cp -r bazel-src/external/com_google_protobuf/src/google/ $output/
+cp -r 'bazel-src/external/grpc+/include/grpc' $output/
+cp -r 'bazel-src/external/grpc+/include/grpcpp' $output/
+cp -r 'bazel-src/external/abseil-cpp+/absl' $output/
+cp -r 'bazel-src/external/protobuf+/src/google' $output/
 
 # TODO: Once das-proto is updated, update atom_space_node to distributed_algorithm_node
 
-# cp bazel-bin/external/com_github_singnet_das_proto/distributed_algorithm_node.grpc.pb.h $output/
-# cp bazel-bin/external/com_github_singnet_das_proto/distributed_algorithm_node.pb.h $output/
-cp bazel-bin/external/com_github_singnet_das_proto/atom_space_node.grpc.pb.h $output/
-cp bazel-bin/external/com_github_singnet_das_proto/atom_space_node.pb.h $output/
-
-cp bazel-bin/external/com_github_singnet_das_proto/common.pb.h $output/
+# cp 'bazel-bin/external/+_repo_rules+com_github_singnet_das_proto/distributed_algorithm_node.grpc.pb.h' $output/
+# cp 'bazel-bin/external/+_repo_rules+com_github_singnet_das_proto/distributed_algorithm_node.pb.h' $output/
+cp 'bazel-bin/external/+_repo_rules+com_github_singnet_das_proto/atom_space_node.grpc.pb.h' $output/
+cp 'bazel-bin/external/+_repo_rules+com_github_singnet_das_proto/atom_space_node.pb.h' $output/
+cp 'bazel-bin/external/+_repo_rules+com_github_singnet_das_proto/common.pb.h' $output/
