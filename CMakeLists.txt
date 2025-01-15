@@ -53,19 +53,19 @@ find_package(nanobind CONFIG REQUIRED)
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets
   ${CMAKE_CURRENT_SOURCE_DIR}/src/commons
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/distributed_algorithm_node)
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/distributed_algorithm_node
   ${CMAKE_CURRENT_SOURCE_DIR}/src/mqtt
 )
 
 file(GLOB_RECURSE headers
   ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets/*.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/commons/*.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/distributed_algorithm_node/*.h)
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/distributed_algorithm_node/*.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/mqtt/*.h
 )
 
 nanobind_add_module(
-  ${EXTENSION_NAME} 
+  ${EXTENSION_NAME}
   # Target the stable ABI for Python 3.12+, which reduces
   # the number of binary wheels that must be built. This
   # does nothing on older Python versions
