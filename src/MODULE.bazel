@@ -1,0 +1,39 @@
+"""
+This Bazel module configuration file sets up dependencies for the das-node project.
+
+It includes project's dependencies such as `rules_cc`, `grpc`, and `googletest`, but also lists some
+dependencies of the dependencies, such as `rules_go`, `googleapis`, and `protoc-gen-validate`, among others.
+This is required basically to set alternative names (`repo_name`) used internally by some packages,
+such as `grpc`, which is in a transitory state (from WORKSPACE to MODULE.bazel).
+Hopefully, this will be fixed by the end of 2025.
+
+Additionally, this file configures a local repository for `mbedcrypto` and an `http_archive` for `das-proto`.
+"""
+
+module(name = "das-node")
+bazel_dep(name = "abseil-cpp", version = "20240722.0", repo_name = "com_google_absl")
+bazel_dep(name = "rules_apple", version = "3.16.1", repo_name = "build_bazel_rules_apple")
+bazel_dep(name = "protoc-gen-validate", version = "1.0.4.bcr.2", repo_name = "com_envoyproxy_protoc_gen_validate")
+bazel_dep(name = "apple_support", version = "1.17.1", repo_name = "build_bazel_apple_support")
+bazel_dep(name = "rules_go", version = "0.52.0", repo_name = "io_bazel_rules_go")
+bazel_dep(name = "googleapis", version = "0.0.0-20240819-fe8ba054a", repo_name = "com_google_googleapis")
+bazel_dep(name = "gazelle", version = "0.41.0", repo_name = "bazel_gazelle")
+bazel_dep(name = "protobuf", version = "29.3", repo_name = "com_google_protobuf")
+bazel_dep(name = "rules_cc", version = "0.0.16")
+bazel_dep(name = "grpc", version = "1.69.0", repo_name = "com_github_grpc_grpc")
+bazel_dep(name = "googletest", version = "1.15.2", repo_name = "com_github_google_googletest")
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+http_archive(
+    name = "com_github_singnet_das_proto",
+    strip_prefix = "das-proto-0.1.14-rc",
+    sha256 = "634de37b8e28c9c5053d6b1b5a862a34b4fb09af16c66d7444a811e883aae3f7",
+    urls = ["https://github.com/singnet/das-proto/archive/refs/tags/0.1.14-rc.tar.gz"],
+)
+
+new_local_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:local.bzl", "new_local_repository")
+new_local_repository(
+    name = "mbedcrypto",
+    path = "/opt/3rd-party/mbedcrypto",
+    build_file_content = 'cc_library(name = "lib", srcs = ["libmbedcrypto.a"], visibility = ["//visibility:public"])',
+)
