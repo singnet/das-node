@@ -1,15 +1,13 @@
 #!/bin/bash
 
-set -euo pipefail
-
 echo "===================================================================================================="
 output="../bazel_assets"
-bazel build --jobs 16 --noenable_bzlmod //:hyperon_das_node
+/opt/bazel/bazelisk build --jobs 16 --noenable_bzlmod //:hyperon_das_node
 
 ##### Workaround to build nanobind with CMake ######
 # removes folder if exists
-if [ -d "$output" ]; then
-  rm -rf $output
+if [ -d "$output" ]; then 
+  rm -rf $output 
 fi
 
 # Recreates folders
@@ -29,7 +27,6 @@ cp -r bazel-src/external/com_github_grpc_grpc/include/grpc $output/
 cp -r bazel-src/external/com_github_grpc_grpc/include/grpcpp/ $output/
 cp -r bazel-src/external/com_google_absl/absl/ $output/
 cp -r bazel-src/external/com_google_protobuf/src/google/ $output/
-cp $(find /usr/local/lib -name "*paho-mqtt*.a") $output
 
 # TODO: Once das-proto is updated, update atom_space_node to distributed_algorithm_node
 

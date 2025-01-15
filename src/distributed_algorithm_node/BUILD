@@ -13,7 +13,6 @@ cc_library(
         # "@com_github_singnet_das_proto//:distributed_algorithm_node_cc_grpc",
         "@com_github_grpc_grpc//:grpc++",
         "@com_github_grpc_grpc//:grpc++_reflection",
-        "//mqtt:mqtt_client_lib",
         "//commons:commons_lib"
     ],
 )
