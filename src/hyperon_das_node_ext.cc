@@ -82,8 +82,7 @@ NB_MODULE(hyperon_das_node_ext, m) {
   // Needs to be updated whenever a new MessageBrokerType is added.
   nb::enum_<MessageBrokerType>(m, "MessageBrokerType")
     .value("GRPC", MessageBrokerType::GRPC)
-    .value("RAM", MessageBrokerType::RAM)
-    .value("MQTT", MessageBrokerType::MQTT);
+    .value("RAM", MessageBrokerType::RAM);
 
   // DistributedAlgorithmNode.h bindings
   nb::class_<DistributedAlgorithmNode, MessageFactory, DistributedAlgorithmNodeTrampoline>(

@@ -9,4 +9,4 @@ ENV PYTHON_EXECUTABLE=${PYTHON_PATH}/bin/python3.10
 RUN ${PYTHON_EXECUTABLE} -m pip install wheel auditwheel
 
 # Set the working directory
-WORKDIR /opt/hyperon_das_node
+WORKDIR /hyperon_das_node

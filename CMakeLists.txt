@@ -53,19 +53,15 @@ find_package(nanobind CONFIG REQUIRED)
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets
   ${CMAKE_CURRENT_SOURCE_DIR}/src/commons
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/distributed_algorithm_node
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/mqtt
-)
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/distributed_algorithm_node)
 
 file(GLOB_RECURSE headers
   ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets/*.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/commons/*.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/distributed_algorithm_node/*.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/mqtt/*.h
-)
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/distributed_algorithm_node/*.h)
 
 nanobind_add_module(
-  ${EXTENSION_NAME}
+  ${EXTENSION_NAME} 
   # Target the stable ABI for Python 3.12+, which reduces
   # the number of binary wheels that must be built. This
   # does nothing on older Python versions
@@ -89,9 +85,8 @@ target_link_libraries(
   ${EXTENSION_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets/libinternal.a
     ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets/libexternal.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets/libpaho-mqtt3a.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets/libpaho-mqtt3c.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets/libpaho-mqttpp3.a
+    # ${CMAKE_CURRENT_SOURCE_DIR}/bazel_assets/libenvoy_api.a
+
 )
 
 # Install directive for scikit-build-core
