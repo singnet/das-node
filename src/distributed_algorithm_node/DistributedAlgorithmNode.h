@@ -1,5 +1,5 @@
-#ifndef _ATOM_SPACE_NODE_ATOMSPACENODE_H
-#define _ATOM_SPACE_NODE_ATOMSPACENODE_H
+#ifndef _DISTRIBUTED_ALGORITHM_NODE_DISTRIBUTEDALGORITHMNODE_H
+#define _DISTRIBUTED_ALGORITHM_NODE_DISTRIBUTEDALGORITHMNODE_H
 
 #include "LeadershipBroker.h"
 #include "MessageBroker.h"
@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace atom_space_node {
+namespace distributed_algorithm_node {
 
 /**
  * Implements a node in a network used for some distributed processing.
@@ -24,17 +24,17 @@ namespace atom_space_node {
  * and its code is executed. The "reference" about what type of Message is being
  * exchanged is encoded like command lines with commands and its arguments.
  *
- * This is what you should care about when extending AtomSpaceNode:
+ * This is what you should care about when extending DistributedAlgorithmNode:
  *
- *   - AtomSpaceNode is the class that build Message objects. That's why it extends
+ *   - DistributedAlgorithmNode is the class that build Message objects. That's why it extends
  *     MessageFactory. This abstract class already knows how to build some basic Message
  *     objects for some commands which are common to all the networks (e.g. joining
- *     of new nodes to the network) but subclasses of AtomSpaceNode should re-implement
+ *     of new nodes to the network) but subclasses of DistributedAlgorithmNode should re-implement
  *     message_factory() to build Message objects for its own distributed application.
  *   - Message commands are executed in separated threads. So if such commands updates some
- *     state variable inside AtomSpaceNode or its subclasses, this state variable should
+ *     state variable inside DistributedAlgorithmNode or its subclasses, this state variable should
  *     be protected by mutual exclusion primitives.
- *   - AtomSpaceNode's constructor expects allocated objects for MessageBroker and
+ *   - DistributedAlgorithmNode's constructor expects allocated objects for MessageBroker and
  *     LeadershipBroker. These are abstract classes which may have many concrete
  *     implementations. When designing your distributed network you need to decide
  *     which messaging system is supposed to be used to actually make the communication
@@ -43,19 +43,19 @@ namespace atom_space_node {
  *     wouldn't need to implement its own messaging system but it may be the case for the
  *     leadership election algorithm as this is highly dependent on the network topology
  *     and expected behaviour.
- *   - AtomSpaceNode has some pure virtual methods that need to be implemented. These are
+ *   - DistributedAlgorithmNode has some pure virtual methods that need to be implemented. These are
  *     the methods called by basic Message objects to acomplish basic tasks like leadership
  *     election and notification of new nodes joning the network. The proper way to respond
- *     to these requests are delegated to concrete classes extending AtomSpaceNode.
+ *     to these requests are delegated to concrete classes extending DistributedAlgorithmNode.
  */
-class AtomSpaceNode : public MessageFactory {
+class DistributedAlgorithmNode : public MessageFactory {
 
 public:
 
     /**
      * Destructor.
      */
-    virtual ~AtomSpaceNode();
+    virtual ~DistributedAlgorithmNode();
 
     /**
      * Basic constructor.
@@ -65,7 +65,7 @@ public:
      * @param leadership_algorithm The concrete class to be used as leadership broker.
      * @param messaging_backend The concrete class to be used as message broker.
      */
-    AtomSpaceNode(
+    DistributedAlgorithmNode(
         const string &node_id,
         LeadershipBrokerType leadership_algorithm,
         MessageBrokerType messaging_backend
@@ -185,6 +185,6 @@ private:
     shared_ptr<MessageBroker> message_broker;
 };
 
-} // namespace atom_space_node
+} // namespace distributed_algorithm_node
 
-#endif // _ATOM_SPACE_NODE_ATOMSPACENODE_H
+#endif // _DISTRIBUTED_ALGORITHM_NODE_DISTRIBUTEDALGORITHMNODE_H

@@ -1,7 +1,7 @@
 #include "MessageBroker.h"
 #include "gtest/gtest.h"
 
-using namespace atom_space_node;
+using namespace distributed_algorithm_node;
 
 class MessageFactoryTest : public MessageFactory {
   shared_ptr<Message> message_factory(string &command, vector<string> &args) {

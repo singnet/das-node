@@ -3,12 +3,12 @@
 
 #include "gtest/gtest.h"
 #include "Utils.h"
-#include "AtomSpaceNode.h"
+#include "DistributedAlgorithmNode.h"
 
-using namespace atom_space_node;
+using namespace distributed_algorithm_node;
 
 // -------------------------------------------------------------------------------------------------
-// Utility classes - concrete subclasses of AtomSpaceNode and Message
+// Utility classes - concrete subclasses of DistributedAlgorithmNode and Message
 
 class TestMessage : public Message {
 public:
@@ -21,7 +21,7 @@ public:
     void act(shared_ptr<MessageFactory> node);
 };
 
-class TestNode : public AtomSpaceNode {
+class TestNode : public DistributedAlgorithmNode {
 
 public:
 
@@ -36,7 +36,7 @@ public:
         const string &server_id,
         LeadershipBrokerType leadership_algorithm,
         MessageBrokerType messaging_backend,
-        bool is_server) : AtomSpaceNode(
+        bool is_server) : DistributedAlgorithmNode(
             node_id,
             leadership_algorithm,
             messaging_backend) {
@@ -68,7 +68,7 @@ public:
     }
 
     std::shared_ptr<Message> message_factory(string &command, vector<string> &args) {
-        std::shared_ptr<Message> message = AtomSpaceNode::message_factory(command, args);
+        std::shared_ptr<Message> message = DistributedAlgorithmNode::message_factory(command, args);
         if (message) {
             return message;
         }
@@ -80,15 +80,15 @@ public:
 };
 
 void TestMessage::act(shared_ptr<MessageFactory> node) {
-    auto atom_space_node = dynamic_pointer_cast<TestNode>(node);
-    atom_space_node->command = this->command;
-    atom_space_node->args = this->args;
+    auto distributed_algorithm_node = dynamic_pointer_cast<TestNode>(node);
+    distributed_algorithm_node->command = this->command;
+    distributed_algorithm_node->args = this->args;
 }
 
 // -------------------------------------------------------------------------------------------------
 // Test cases
 
-TEST(AtomSpaceNode, basics) {
+TEST(DistributedAlgorithmNode, basics) {
     string server_id = "localhost:30700";
     string client1_id = "localhost:30701";
     string client2_id = "localhost:30702";
@@ -155,7 +155,7 @@ TEST(AtomSpaceNode, basics) {
 
 }
 
-TEST(AtomSpaceNode, communication) {
+TEST(DistributedAlgorithmNode, communication) {
 
     string server_id = "localhost:30700";
     string client1_id = "localhost:30701";

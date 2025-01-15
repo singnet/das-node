@@ -1,9 +1,11 @@
-#ifndef _ATOM_SPACE_NODE_MESSAGEBROKER_H
-#define _ATOM_SPACE_NODE_MESSAGEBROKER_H
+#ifndef _DISTRIBUTED_ALGORITHM_NODE_MESSAGEBROKER_H
+#define _DISTRIBUTED_ALGORITHM_NODE_MESSAGEBROKER_H
 
 #include "Message.h"
 #include "MqttClient.h"
 #include "RequestQueue.h"
+// TODO: Once das-proto is updated, update atom_space_node to
+// distributed_algorithm_node #include "distributed_algorithm_node.grpc.pb.h"
 #include "atom_space_node.grpc.pb.h"
 #include <mutex>
 #include <string>
@@ -15,11 +17,11 @@ using namespace std;
 using namespace commons;
 using namespace mqtt_client;
 
-namespace atom_space_node {
+namespace distributed_algorithm_node {
 
 enum class MessageBrokerType { RAM, GRPC, MQTT };
 
-class AtomSpaceNode;
+class DistributedAlgorithmNode;
 
 // -------------------------------------------------------------------------------------------------
 // Abstract superclass
@@ -27,9 +29,9 @@ class AtomSpaceNode;
 /**
  * Implements the communication layer used by nodes to exchange Messages.
  *
- * This is the abstract class defining the API used by AtomSpaceNodes to
- * exchange messages. Users of the AtomSpaceNode module aren't supposed to
- * interact with MessageBroker directly.
+ * This is the abstract class defining the API used by DistributedAlgorithmNodes
+ * to exchange messages. Users of the DistributedAlgorithmNode module aren't
+ * supposed to interact with MessageBroker directly.
  */
 class MessageBroker {
 
@@ -252,6 +254,9 @@ private:
  * to return, this answer is supposed to be implemented as a separate Message
  * going back from the target node to the node that originated the request.
  */
+// TODO: Once das-proto is updated, update atom_space_node to
+// distributed_algorithm_node class SynchronousGRPC : public MessageBroker,
+// public dasproto::DistributedAlgorithmNode::Service {
 class SynchronousGRPC : public MessageBroker,
                         public dasproto::AtomSpaceNode::Service {
 
@@ -389,8 +394,10 @@ private:
   const string broadcast_topic = "HyperonDasNode/broadcast";
   const string payload_separator = "\t";
 
-  const string get_msg_payload(const string &command, const vector<string> &args);
-  static void parse_id(const string &id, string &broker_address, string &node_id);
+  const string get_msg_payload(const string &command,
+                               const vector<string> &args);
+  static void parse_id(const string &id, string &broker_address,
+                       string &node_id);
   static unsigned int MESSASGE_THREAD_COUNT;
   static unordered_map<string, RequestQueue *> NODE_QUEUE;
   static mutex NODE_QUEUE_MUTES;
@@ -417,6 +424,6 @@ public:
   unordered_set<string> visited;
 };
 
-} // namespace atom_space_node
+} // namespace distributed_algorithm_node
 
-#endif // _ATOM_SPACE_NODE_MESSAGEBROKER_H
+#endif // _DISTRIBUTED_ALGORITHM_NODE_MESSAGEBROKER_H

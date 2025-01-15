@@ -1,7 +1,7 @@
 #include "LeadershipBroker.h"
 #include "Utils.h"
 
-using namespace atom_space_node;
+using namespace distributed_algorithm_node;
 
 // -------------------------------------------------------------------------------------------------
 // Constructors and destructors

@@ -1,7 +1,7 @@
 [project]
 name = "hyperon_das_node"
 version = "0.0.1"
-description = "Distribuited Atom Space Node for Hyperon"
+description = "Distrbuted Algorithm Node for Hyperon"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [

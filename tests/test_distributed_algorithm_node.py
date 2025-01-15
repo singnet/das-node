@@ -1,6 +1,6 @@
 from typing import List
 from unittest import TestCase
-from hyperon_das_node import AtomSpaceNode, LeadershipBrokerType, MessageBrokerType, Message
+from hyperon_das_node import DistributedAlgorithmNode, LeadershipBrokerType, MessageBrokerType, Message
 import time
 
 class TestMessage(Message):
@@ -14,11 +14,11 @@ class TestMessage(Message):
         self.command = command
         self.args = args
 
-    def act(self, node: AtomSpaceNode):
+    def act(self, node: DistributedAlgorithmNode):
         node.command = self.command
         node.args = self.args
 
-class TestNode(AtomSpaceNode):
+class TestNode(DistributedAlgorithmNode):
 
     def __init__(
         self, 
@@ -60,7 +60,7 @@ class TestNode(AtomSpaceNode):
         else:
             return None
 
-class TestAtomSpaceNode(TestCase):
+class TestDistributedAlgorithmNode(TestCase):
 
     def test_basics(self):
 

@@ -4,16 +4,16 @@
 #include <nanobind/stl/shared_ptr.h>
 #include <nanobind/trampoline.h>
 
-#include "atom_space_node/AtomSpaceNode.h"
-#include "atom_space_node/Message.h"
-#include "atom_space_node/MessageBroker.h"
-#include "atom_space_node/LeadershipBroker.h"
+#include "distributed_algorithm_node/DistributedAlgorithmNode.h"
+#include "distributed_algorithm_node/Message.h"
+#include "distributed_algorithm_node/MessageBroker.h"
+#include "distributed_algorithm_node/LeadershipBroker.h"
 
 namespace nb = nanobind;
 using namespace nb::literals; // Enables use of literal "_a" for named arguments
 
 using namespace std;
-using namespace atom_space_node;
+using namespace distributed_algorithm_node;
 
 // Shared pointers aliases
 using MessagePtr = shared_ptr<Message>;
@@ -42,11 +42,11 @@ public:
   };
 };
 
-class AtomSpaceNodeTrampoline : public AtomSpaceNode {
+class DistributedAlgorithmNodeTrampoline : public DistributedAlgorithmNode {
 public:
   // Defines a trampoline for the BaseClass
   // Since we are overriding 3 methods in Python, thon
-  NB_TRAMPOLINE(AtomSpaceNode, 3);
+  NB_TRAMPOLINE(DistributedAlgorithmNode, 3);
   MessagePtr message_factory(string &command, vector<string> &args) override {
     // Allows Python to override a non pure virtual method
     NB_OVERRIDE(message_factory, command, args);
@@ -85,24 +85,24 @@ NB_MODULE(hyperon_das_node_ext, m) {
     .value("RAM", MessageBrokerType::RAM)
     .value("MQTT", MessageBrokerType::MQTT);
 
-  // AtomSpaceNode.h bindings
-  nb::class_<AtomSpaceNode, MessageFactory, AtomSpaceNodeTrampoline>(
-      m, "AtomSpaceNode")
+  // DistributedAlgorithmNode.h bindings
+  nb::class_<DistributedAlgorithmNode, MessageFactory, DistributedAlgorithmNodeTrampoline>(
+      m, "DistributedAlgorithmNode")
       .def(nb::init<string, LeadershipBrokerType, MessageBrokerType>(),
            "node_id"_a, "leadership_algorithm"_a, "messaging_backend"_a)
-      .def("join_network", &AtomSpaceNode::join_network)
-      .def("is_leader", &AtomSpaceNode::is_leader)
-      .def("leader_id", &AtomSpaceNode::leader_id)
-      .def("has_leader", &AtomSpaceNode::has_leader)
+      .def("join_network", &DistributedAlgorithmNode::join_network)
+      .def("is_leader", &DistributedAlgorithmNode::is_leader)
+      .def("leader_id", &DistributedAlgorithmNode::leader_id)
+      .def("has_leader", &DistributedAlgorithmNode::has_leader)
       // Whenever we have a parameter that is a pointer or a reference, we need
       // to specify the name of the argument. Otherwise nanobind will add a
       // default arg0, arg1, etc.
-      .def("add_peer", &AtomSpaceNode::add_peer, "peer_id"_a)
-      .def("node_id", &AtomSpaceNode::node_id)
-      .def("broadcast", &AtomSpaceNode::broadcast, "command"_a, "args"_a)
-      .def("send", &AtomSpaceNode::send, "command"_a, "args"_a, "recipient"_a)
-      .def("node_joined_network", &AtomSpaceNode::node_joined_network,
+      .def("add_peer", &DistributedAlgorithmNode::add_peer, "peer_id"_a)
+      .def("node_id", &DistributedAlgorithmNode::node_id)
+      .def("broadcast", &DistributedAlgorithmNode::broadcast, "command"_a, "args"_a)
+      .def("send", &DistributedAlgorithmNode::send, "command"_a, "args"_a, "recipient"_a)
+      .def("node_joined_network", &DistributedAlgorithmNode::node_joined_network,
            "node_id"_a)
-      .def("cast_leadership_vote", &AtomSpaceNode::cast_leadership_vote)
-      .def("message_factory", &AtomSpaceNode::message_factory);
+      .def("cast_leadership_vote", &DistributedAlgorithmNode::cast_leadership_vote)
+      .def("message_factory", &DistributedAlgorithmNode::message_factory);
 }

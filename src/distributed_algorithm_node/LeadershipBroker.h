@@ -1,11 +1,11 @@
-#ifndef _ATOM_SPACE_NODE_LEADERSHIPBROKER_H
-#define _ATOM_SPACE_NODE_LEADERSHIPBROKER_H
+#ifndef _DISTRIBUTED_ALGORITHM_NODE_LEADERSHIPBROKER_H
+#define _DISTRIBUTED_ALGORITHM_NODE_LEADERSHIPBROKER_H
 
 #include "MessageBroker.h"
 
 using namespace std;
 
-namespace atom_space_node {
+namespace distributed_algorithm_node {
 
 enum class LeadershipBrokerType {
     SINGLE_MASTER_SERVER
@@ -18,8 +18,8 @@ enum class LeadershipBrokerType {
 /**
  * Implements the algorithm for leader election.
  *
- * This is the abstract class defining the API used by AtomSpaceNodes to deal with leader election.
- * Users of the AtomSpaceNode module aren't supposed to interact with LeadershipBroker directly.
+ * This is the abstract class defining the API used by DistributedAlgorithmNodes to deal with leader election.
+ * Users of the DistributedAlgorithmNode module aren't supposed to interact with LeadershipBroker directly.
  */
 class LeadershipBroker {
 
@@ -116,7 +116,7 @@ public:
     void start_leader_election(const string &my_vote);
 };
 
-} // namespace atom_space_node
+} // namespace distributed_algorithm_node
 
-#endif // _ATOM_SPACE_NODE_LEADERSHIPBROKER_H
+#endif // _DISTRIBUTED_ALGORITHM_NODE_LEADERSHIPBROKER_H
 

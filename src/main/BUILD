@@ -6,10 +6,11 @@ cc_library(
     hdrs = glob(["*.h"]),
     deps = [
         "//commons:commons_lib",
-        "//atom_space_node:atom_space_node_lib",
+        "//distributed_algorithm_node:distributed_algorithm_node_lib",
         "//mqtt:mqtt_client_lib",
         "@com_github_grpc_grpc//:grpc++",
         "@com_github_grpc_grpc//:grpc++_reflection",
         "@com_github_singnet_das_proto//:atom_space_node_cc_grpc",
+        # "@com_github_singnet_das_proto//:distributed_algorithm_node_cc_grpc",
     ],
 )
