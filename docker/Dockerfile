@@ -5,7 +5,6 @@ ARG TMP_DIR="/tmp"
 
 ARG DAS_NODE_DIR="${BASE_DIR}/hyperon_das_node"
 ARG DATA_DIR="${BASE_DIR}/data"
-ARG GRPC_DIR="${BASE_DIR}/grpc"
 ARG PROTO_DIR="${BASE_DIR}/proto"
 ARG BAZEL_DIR="${BASE_DIR}/bazel"
 ARG THIRDPARTY="${BASE_DIR}/3rd-party"
@@ -13,7 +12,7 @@ ARG THIRDPARTY="${BASE_DIR}/3rd-party"
 ENV CPLUS_INCLUDE_PATH="/opt/3rd-party/mbedcrypto/include/"
 ENV CC=/usr/bin/gcc
 
-RUN mkdir -p ${DAS_NODE_DIR} ${DATA_DIR} ${GRPC_DIR} \ 
+RUN mkdir -p ${DAS_NODE_DIR} ${DATA_DIR} \
   ${BAZEL_DIR} ${PROTO_DIR} ${THIRDPARTY}
 
 VOLUME ${DAS_NODE_DIR}
@@ -24,16 +23,13 @@ RUN apt-get update &&\
 
 RUN pip install --no-cache-dir nanobind==2.1.0
 
-COPY assets/3rd-party.tgz ${THIRDPARTY}
-RUN --mount=type=cache,target=/root/.cache/bazel cd ${THIRDPARTY} &&\
+WORKDIR ${THIRDPARTY}
+COPY assets/3rd-party.tgz .
+RUN --mount=type=cache,target=/root/.cache/bazel \
   tar xzvf 3rd-party.tgz &&\
   rm -f 3rd-party.tgz &&\
   mkdir -p ${DAS_NODE_DIR}/src/3rd-party &&\
-  ln -s ${THIRDPARTY} ${DAS_NODE_DIR}/src/3rd-party &&\
-  # mv bazelisk ${BAZEL_DIR}
-
-# ADD https://raw.githubusercontent.com/singnet/das-query-engine/master/proto/common.proto ${PROTO_DIR}
-# ADD https://raw.githubusercontent.com/singnet/das-query-engine/master/proto/echo.proto ${PROTO_DIR}
+  ln -s ${THIRDPARTY} ${DAS_NODE_DIR}/src/3rd-party
 
 WORKDIR ${TMP_DIR}
 
@@ -55,5 +51,4 @@ RUN cmake -Bbuild -H. -DPAHO_WITH_MQTT_C=ON -DPAHO_BUILD_EXAMPLES=OFF -DPAHO_WIT
 
 WORKDIR "${DAS_NODE_DIR}"
 
-#COPY source code and relevant info
 COPY . .
