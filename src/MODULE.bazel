@@ -27,7 +27,7 @@ http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "ht
 http_archive(
     name = "com_github_singnet_das_proto",
     strip_prefix = "das-proto-0.1.14-rc",
-    sha256 = "634de37b8e28c9c5053d6b1b5a862a34b4fb09af16c66d7444a811e883aae3f7",
+    sha256 = "f2a878937372fb054803c4b5a3c45c3df46f8ca80c851cba9d9c335b5638f4d9",
     urls = ["https://github.com/singnet/das-proto/archive/refs/tags/0.1.14-rc.tar.gz"],
 )
 
